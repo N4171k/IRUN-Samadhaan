@@ -1,0 +1,268 @@
+{
+  "test_id": "oir_test_001",
+  "time_limit_minutes": 30,
+  "questions": [
+    {
+      "id": 1,
+      "type": "verbal",
+      "question": "Complete the analogy: BOOK : READ :: FOOD : ?",
+      "options": ["Cook", "Eat", "Taste", "Prepare"],
+      "answer": "Eat"
+    },
+    {
+      "id": 2,
+      "type": "verbal",
+      "question": "Which word is the odd one out?",
+      "options": ["Triangle", "Square", "Circle", "Pentagon"],
+      "answer": "Circle"
+    },
+    {
+      "id": 3,
+      "type": "verbal",
+      "question": "If CHAIR is coded as DIBJS, then PHONE is coded as:",
+      "options": ["QIPOF", "QJPOG", "QIPOG", "QJPOF"],
+      "answer": "QIPOF"
+    },
+    {
+      "id": 4,
+      "type": "verbal",
+      "question": "Complete the series: 2, 6, 12, 20, 30, ?",
+      "options": ["40", "42", "44", "46"],
+      "answer": "42"
+    },
+    {
+      "id": 5,
+      "type": "verbal",
+      "question": "ARMY : SOLDIER :: HOSPITAL : ?",
+      "options": ["Doctor", "Patient", "Medicine", "Nurse"],
+      "answer": "Doctor"
+    },
+    {
+      "id": 6,
+      "type": "verbal",
+      "question": "Which number comes next: 1, 4, 9, 16, 25, ?",
+      "options": ["30", "35", "36", "49"],
+      "answer": "36"
+    },
+    {
+      "id": 7,
+      "type": "verbal",
+      "question": "Find the odd one: Honest, Truthful, Sincere, Corrupt",
+      "options": ["Honest", "Truthful", "Sincere", "Corrupt"],
+      "answer": "Corrupt"
+    },
+    {
+      "id": 8,
+      "type": "verbal",
+      "question": "WATER : THIRST :: FOOD : ?",
+      "options": ["Hunger", "Eat", "Cook", "Taste"],
+      "answer": "Hunger"
+    },
+    {
+      "id": 9,
+      "type": "verbal",
+      "question": "If MONDAY is coded as 123456, then DYNAMO is coded as:",
+      "options": ["453612", "456312", "463512", "465312"],
+      "answer": "453612"
+    },
+    {
+      "id": 10,
+      "type": "verbal",
+      "question": "Complete: CAR : GARAGE :: PLANE : ?",
+      "options": ["Sky", "Airport", "Hangar", "Runway"],
+      "answer": "Hangar"
+    },
+    {
+      "id": 11,
+      "type": "non-verbal",
+      "question": "Which figure completes the sequence?",
+      "sequence": [
+        {"shape": "triangle", "rotation": 0, "fill": "none", "size": "medium"},
+        {"shape": "triangle", "rotation": 90, "fill": "none", "size": "medium"},
+        {"shape": "triangle", "rotation": 180, "fill": "none", "size": "medium"}
+      ],
+      "options": [
+        {"shape": "triangle", "rotation": 270, "fill": "none", "size": "medium"},
+        {"shape": "square", "rotation": 0, "fill": "none", "size": "medium"},
+        {"shape": "circle", "rotation": 0, "fill": "none", "size": "medium"},
+        {"shape": "triangle", "rotation": 0, "fill": "filled", "size": "medium"}
+      ],
+      "answer": {"shape": "triangle", "rotation": 270, "fill": "none", "size": "medium"}
+    },
+    {
+      "id": 12,
+      "type": "non-verbal",
+      "question": "What comes next in the pattern?",
+      "sequence": [
+        {"shape": "square", "rotation": 0, "fill": "none", "size": "small"},
+        {"shape": "square", "rotation": 0, "fill": "none", "size": "medium"},
+        {"shape": "square", "rotation": 0, "fill": "none", "size": "large"}
+      ],
+      "options": [
+        {"shape": "square", "rotation": 0, "fill": "filled", "size": "small"},
+        {"shape": "circle", "rotation": 0, "fill": "none", "size": "small"},
+        {"shape": "square", "rotation": 45, "fill": "none", "size": "medium"},
+        {"shape": "triangle", "rotation": 0, "fill": "none", "size": "large"}
+      ],
+      "answer": {"shape": "square", "rotation": 0, "fill": "filled", "size": "small"}
+    },
+    {
+      "id": 13,
+      "type": "non-verbal",
+      "question": "Complete the pattern:",
+      "sequence": [
+        {"shape": "circle", "rotation": 0, "fill": "none", "size": "medium"},
+        {"shape": "circle", "rotation": 0, "fill": "filled", "size": "medium"},
+        {"shape": "circle", "rotation": 0, "fill": "striped", "size": "medium"}
+      ],
+      "options": [
+        {"shape": "circle", "rotation": 0, "fill": "none", "size": "medium"},
+        {"shape": "square", "rotation": 0, "fill": "none", "size": "medium"},
+        {"shape": "triangle", "rotation": 0, "fill": "filled", "size": "medium"},
+        {"shape": "circle", "rotation": 0, "fill": "filled", "size": "large"}
+      ],
+      "answer": {"shape": "circle", "rotation": 0, "fill": "none", "size": "medium"}
+    },
+    {
+      "id": 14,
+      "type": "non-verbal",
+      "question": "Which figure fits the pattern?",
+      "sequence": [
+        {"shape": "rectangle", "rotation": 0, "fill": "none", "size": "medium"},
+        {"shape": "rectangle", "rotation": 90, "fill": "none", "size": "medium"},
+        {"shape": "rectangle", "rotation": 180, "fill": "none", "size": "medium"}
+      ],
+      "options": [
+        {"shape": "rectangle", "rotation": 270, "fill": "none", "size": "medium"},
+        {"shape": "rectangle", "rotation": 0, "fill": "filled", "size": "medium"},
+        {"shape": "square", "rotation": 270, "fill": "none", "size": "medium"},
+        {"shape": "rectangle", "rotation": 45, "fill": "none", "size": "medium"}
+      ],
+      "answer": {"shape": "rectangle", "rotation": 270, "fill": "none", "size": "medium"}
+    },
+    {
+      "id": 15,
+      "type": "non-verbal",
+      "question": "What comes next?",
+      "sequence": [
+        {"shape": "pentagon", "rotation": 0, "fill": "none", "size": "small"},
+        {"shape": "pentagon", "rotation": 72, "fill": "none", "size": "small"},
+        {"shape": "pentagon", "rotation": 144, "fill": "none", "size": "small"}
+      ],
+      "options": [
+        {"shape": "pentagon", "rotation": 216, "fill": "none", "size": "small"},
+        {"shape": "pentagon", "rotation": 0, "fill": "filled", "size": "small"},
+        {"shape": "hexagon", "rotation": 216, "fill": "none", "size": "small"},
+        {"shape": "pentagon", "rotation": 180, "fill": "none", "size": "small"}
+      ],
+      "answer": {"shape": "pentagon", "rotation": 216, "fill": "none", "size": "small"}
+    },
+    {
+      "id": 16,
+      "type": "non-verbal",
+      "question": "Complete the sequence:",
+      "sequence": [
+        {"shape": "triangle", "rotation": 0, "fill": "striped", "size": "large"},
+        {"shape": "square", "rotation": 0, "fill": "striped", "size": "large"},
+        {"shape": "circle", "rotation": 0, "fill": "striped", "size": "large"}
+      ],
+      "options": [
+        {"shape": "rectangle", "rotation": 0, "fill": "striped", "size": "large"},
+        {"shape": "pentagon", "rotation": 0, "fill": "striped", "size": "large"},
+        {"shape": "triangle", "rotation": 90, "fill": "striped", "size": "large"},
+        {"shape": "circle", "rotation": 0, "fill": "filled", "size": "large"}
+      ],
+      "answer": {"shape": "rectangle", "rotation": 0, "fill": "striped", "size": "large"}
+    },
+    {
+      "id": 17,
+      "type": "non-verbal",
+      "question": "What figure comes next?",
+      "sequence": [
+        {"shape": "square", "rotation": 0, "fill": "filled", "size": "medium"},
+        {"shape": "square", "rotation": 45, "fill": "filled", "size": "medium"},
+        {"shape": "square", "rotation": 90, "fill": "filled", "size": "medium"}
+      ],
+      "options": [
+        {"shape": "square", "rotation": 135, "fill": "filled", "size": "medium"},
+        {"shape": "square", "rotation": 0, "fill": "none", "size": "medium"},
+        {"shape": "triangle", "rotation": 135, "fill": "filled", "size": "medium"},
+        {"shape": "square", "rotation": 90, "fill": "striped", "size": "medium"}
+      ],
+      "answer": {"shape": "square", "rotation": 135, "fill": "filled", "size": "medium"}
+    },
+    {
+      "id": 18,
+      "type": "non-verbal",
+      "question": "Which pattern continues the series?",
+      "sequence": [
+        {"shape": "circle", "rotation": 0, "fill": "none", "size": "small"},
+        {"shape": "circle", "rotation": 0, "fill": "none", "size": "medium"},
+        {"shape": "triangle", "rotation": 0, "fill": "none", "size": "small"}
+      ],
+      "options": [
+        {"shape": "triangle", "rotation": 0, "fill": "none", "size": "medium"},
+        {"shape": "square", "rotation": 0, "fill": "none", "size": "small"},
+        {"shape": "circle", "rotation": 0, "fill": "filled", "size": "large"},
+        {"shape": "pentagon", "rotation": 0, "fill": "none", "size": "small"}
+      ],
+      "answer": {"shape": "triangle", "rotation": 0, "fill": "none", "size": "medium"}
+    },
+    {
+      "id": 19,
+      "type": "non-verbal",
+      "question": "Complete the logical sequence:",
+      "sequence": [
+        {"shape": "rectangle", "rotation": 0, "fill": "none", "size": "large"},
+        {"shape": "rectangle", "rotation": 0, "fill": "filled", "size": "medium"},
+        {"shape": "rectangle", "rotation": 0, "fill": "striped", "size": "small"}
+      ],
+      "options": [
+        {"shape": "rectangle", "rotation": 90, "fill": "none", "size": "large"},
+        {"shape": "square", "rotation": 0, "fill": "none", "size": "large"},
+        {"shape": "rectangle", "rotation": 0, "fill": "none", "size": "medium"},
+        {"shape": "circle", "rotation": 0, "fill": "striped", "size": "small"}
+      ],
+      "answer": {"shape": "rectangle", "rotation": 90, "fill": "none", "size": "large"}
+    },
+    {
+      "id": 20,
+      "type": "non-verbal",
+      "question": "What completes this pattern?",
+      "sequence": [
+        {"shape": "pentagon", "rotation": 0, "fill": "filled", "size": "medium"},
+        {"shape": "pentagon", "rotation": 36, "fill": "filled", "size": "medium"},
+        {"shape": "pentagon", "rotation": 72, "fill": "filled", "size": "medium"}
+      ],
+      "options": [
+        {"shape": "pentagon", "rotation": 108, "fill": "filled", "size": "medium"},
+        {"shape": "pentagon", "rotation": 0, "fill": "none", "size": "medium"},
+        {"shape": "hexagon", "rotation": 108, "fill": "filled", "size": "medium"},
+        {"shape": "pentagon", "rotation": 90, "fill": "filled", "size": "medium"}
+      ],
+      "answer": {"shape": "pentagon", "rotation": 108, "fill": "filled", "size": "medium"}
+    }
+  ],
+  "answer_key": {
+    "1": "Eat",
+    "2": "Circle",
+    "3": "QIPOF",
+    "4": "42",
+    "5": "Doctor",
+    "6": "36",
+    "7": "Corrupt",
+    "8": "Hunger",
+    "9": "453612",
+    "10": "Hangar",
+    "11": {"shape": "triangle", "rotation": 270, "fill": "none", "size": "medium"},
+    "12": {"shape": "square", "rotation": 0, "fill": "filled", "size": "small"},
+    "13": {"shape": "circle", "rotation": 0, "fill": "none", "size": "medium"},
+    "14": {"shape": "rectangle", "rotation": 270, "fill": "none", "size": "medium"},
+    "15": {"shape": "pentagon", "rotation": 216, "fill": "none", "size": "small"},
+    "16": {"shape": "rectangle", "rotation": 0, "fill": "striped", "size": "large"},
+    "17": {"shape": "square", "rotation": 135, "fill": "filled", "size": "medium"},
+    "18": {"shape": "triangle", "rotation": 0, "fill": "none", "size": "medium"},
+    "19": {"shape": "rectangle", "rotation": 90, "fill": "none", "size": "large"},
+    "20": {"shape": "pentagon", "rotation": 108, "fill": "filled", "size": "medium"}
+  }
+}

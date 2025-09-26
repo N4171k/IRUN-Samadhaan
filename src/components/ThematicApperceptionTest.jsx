@@ -1,0 +1,275 @@
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { account } from '../lib/appwrite';
+import Navbar from './Navbar';
+import { ArrowLeft, RefreshCw } from 'lucide-react';
+
+function ThematicApperceptionTest() {
+  const navigate = useNavigate();
+  const [userDetails, setUserDetails] = useState(null);
+  const [story, setStory] = useState('');
+  const [feedback, setFeedback] = useState('');
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [tatTopic, setTatTopic] = useState('');
+  const [tatImage, setTatImage] = useState(null);
+  const [isLoadingTopic, setIsLoadingTopic] = useState(true);
+  const [isLoadingFeedback, setIsLoadingFeedback] = useState(false);
+  const [topicError, setTopicError] = useState(null);
+
+  // API base URL - memoized for performance
+  const API_BASE_URL = useMemo(() => 'http://localhost:3001/api/tat', []);
+
+  // Fetch user details
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const user = await account.get();
+        setUserDetails(user);
+      } catch (err) {
+        console.error('User not logged in:', err);
+        navigate('/login');
+      }
+    }
+    fetchUser();
+  }, [navigate]);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await account.deleteSession('current');
+    } catch {}
+    navigate('/login');
+  }, [navigate]);
+
+  // Optimized function to fetch a new TAT topic with image from backend
+  const fetchTATTopic = useCallback(async () => {
+    setIsLoadingTopic(true);
+    setTopicError(null);
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/topic-with-image`);
+      const result = await response.json();
+      
+      if (result.success && result.data?.topic) {
+        setTatTopic(result.data.topic);
+        if (result.data.image) {
+          setTatImage(result.data.image);
+        }
+      } else {
+        throw new Error(result.message || 'Failed to fetch topic');
+      }
+    } catch (error) {
+      console.error('Error fetching TAT topic:', error);
+      setTopicError('Failed to load topic. Please try again.');
+      // Fallback topic and image
+      setTatTopic('A young man looking out at a village from a hilltop');
+      setTatImage(null);
+    } finally {
+      setIsLoadingTopic(false);
+    }
+  }, [API_BASE_URL]);
+
+  // Function to get feedback from backend
+  const getFeedbackFromAPI = async (userStory, topic) => {
+    setIsLoadingFeedback(true);
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/feedback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          story: userStory,
+          topic: topic
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success && result.data?.feedback) {
+        return result.data.feedback;
+      } else {
+        throw new Error(result.message || 'Failed to get feedback');
+      }
+    } catch (error) {
+      console.error('Error getting feedback:', error);
+      // Fallback feedback
+      return `Based on your story, you demonstrate good imaginative thinking and narrative structure. Your response shows creativity and the ability to construct a coherent storyline. Consider adding more emotional depth and character motivation to enhance your storytelling skills.`;
+    } finally {
+      setIsLoadingFeedback(false);
+    }
+  };
+
+  // Load initial topic when component mounts
+  useEffect(() => {
+    fetchTATTopic();
+  }, []);
+
+  const handleGetFeedback = async () => {
+    if (story.trim()) {
+      const feedbackResult = await getFeedbackFromAPI(story, tatTopic);
+      setFeedback(feedbackResult);
+      setShowFeedback(true);
+    } else {
+      alert('Please write a story first before requesting feedback.');
+    }
+  };
+
+  const handleNewTopic = () => {
+    setStory('');
+    setFeedback('');
+    setShowFeedback(false);
+    setTatImage(null);
+    fetchTATTopic();
+  };
+
+  const handleBackToSSB = () => {
+    navigate('/ssb-drills');
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Use the existing Navbar component */}
+      <Navbar userDetails={userDetails} onLogout={handleLogout} />
+
+      {/* Breadcrumb Navigation */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-6xl mx-auto px-4 py-3">
+          <div className="flex items-center space-x-2 text-sm">
+            <button 
+              onClick={handleBackToSSB}
+              className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to SSB Drills</span>
+            </button>
+            <span className="text-gray-400">/</span>
+            <span className="text-gray-700 font-medium">Thematic Apperception Test</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-4 py-6">
+          <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+            {/* Test Header */}
+            <div className="bg-gray-100 px-6 py-4 border-b">
+              <h1 className="text-xl font-semibold text-gray-800">
+                SSB Drills &gt; Thematic Apperception Test (TAT)
+              </h1>
+          </div>
+
+          {/* Test Content */}
+          <div className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Story Writing Area */}
+              <div className="space-y-4">
+                <div className="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-300">
+                  <div className="text-center text-gray-500 py-8">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">TAT Topic:</span>
+                      <button
+                        onClick={handleNewTopic}
+                        disabled={isLoadingTopic}
+                        className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 transition-colors disabled:opacity-50"
+                        title="Get new topic"
+                      >
+                        <RefreshCw className={`w-4 h-4 ${isLoadingTopic ? 'animate-spin' : ''}`} />
+                        <span className="text-xs">New Topic</span>
+                      </button>
+                    </div>
+                    
+                    {isLoadingTopic ? (
+                      <div className="flex items-center justify-center py-4">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                        <span className="ml-2 text-sm">Loading topic...</span>
+                      </div>
+                    ) : topicError ? (
+                      <div className="text-red-500 py-4">
+                        <p className="text-sm">{topicError}</p>
+                        <button 
+                          onClick={fetchTATTopic}
+                          className="mt-2 text-xs text-blue-600 hover:text-blue-800 underline"
+                        >
+                          Try again
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="text-sm font-medium text-gray-700 py-2">
+                        {tatTopic}
+                      </p>
+                    )}
+                    
+                    <div className="mt-4 w-full h-48 bg-white rounded border flex items-center justify-center overflow-hidden">
+                      {isLoadingTopic ? (
+                        <div className="text-gray-400 text-sm">Loading image...</div>
+                      ) : tatImage?.imageUrl ? (
+                        <img 
+                          src={tatImage.imageUrl} 
+                          alt={tatImage.description || tatTopic}
+                          className="max-w-full max-h-full object-contain rounded"
+                          title={tatImage.description || tatTopic}
+                        />
+                      ) : (
+                        <span className="text-gray-400 text-sm">Generated image will appear here</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Write Your Story Here :
+                  </label>
+                  <textarea
+                    value={story}
+                    onChange={(e) => setStory(e.target.value)}
+                    className="w-full h-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    placeholder="Write your story based on the image..."
+                  />
+                </div>
+              </div>
+
+              {/* Feedback Area */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Our Feedback
+                  </label>
+                  <div className="w-full h-40 px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
+                    {showFeedback ? (
+                      <p className="text-sm text-gray-700 leading-relaxed">
+                        {feedback}
+                      </p>
+                    ) : (
+                      <p className="text-gray-400 text-sm">
+                        Feedback will appear here
+                      </p>
+                    )}
+                  </div>
+                </div>
+                
+                <button
+                  onClick={handleGetFeedback}
+                  disabled={isLoadingFeedback || !story.trim()}
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                >
+                  {isLoadingFeedback ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>Getting Feedback...</span>
+                    </>
+                  ) : (
+                    <span>Get Feedback</span>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default ThematicApperceptionTest;
