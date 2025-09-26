@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" role="img" aria-labelledby="title desc">
+  <title id="title">Fallback silhouette scene</title>
+  <desc id="desc">Minimal monochrome scene of people under a tree used when the AI generated PPDT image fails to load.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0f0f0" />
+      <stop offset="1" stop-color="#c8c8c8" />
+    </linearGradient>
+  </defs>
+  <rect width="640" height="480" fill="url(#sky)" />
+  <rect y="340" width="640" height="140" fill="#2d2d2d" />
+  <path d="M120 250c70-20 120 30 170 10 40-16 40-60 70-70 40-14 80 50 120 20 55-40 100 10 100 10v200H0V280s60 10 120-30z" fill="#3b3b3b" opacity="0.6" />
+  <circle cx="500" cy="110" r="36" fill="#e0e0e0" opacity="0.55" />
+  <path d="M240 200c0 35-25 55-55 55s-55-20-55-55 25-70 55-70 55 35 55 70z" fill="#1f1f1f" />
+  <rect x="180" y="200" width="60" height="100" rx="20" fill="#1a1a1a" />
+  <path d="M158 300c20-25 84-25 104 0 8 10 8 40 8 40H150s0-30 8-40z" fill="#141414" />
+  <path d="M420 195c0 30-22 48-48 48s-48-18-48-48 22-60 48-60 48 30 48 60z" fill="#262626" />
+  <rect x="360" y="195" width="36" height="85" rx="16" fill="#1d1d1d" />
+  <path d="M332 280c16-20 70-20 86 0 7 8 7 32 7 32h-100s0-24 7-32z" fill="#131313" />
+  <path d="M60 190c30-60 120-120 200-130" fill="none" stroke="#2a2a2a" stroke-width="18" stroke-linecap="round" />
+  <path d="M90 220c34-56 110-110 180-120" fill="none" stroke="#1a1a1a" stroke-width="16" stroke-linecap="round" />
+</svg>

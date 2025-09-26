@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" role="img" aria-labelledby="title desc">
+  <title id="title">Fallback TAT scene</title>
+  <desc id="desc">Hand-drawn style monochrome illustration showing figures in a village square with space for interpretation.</desc>
+  <defs>
+    <linearGradient id="skyTat" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f7f7f7" />
+      <stop offset="1" stop-color="#d0d0d0" />
+    </linearGradient>
+  </defs>
+  <rect width="640" height="480" fill="url(#skyTat)" />
+  <path d="M0 320h640v160H0z" fill="#333" opacity="0.85" />
+  <path d="M120 180c30-60 120-120 220-120" fill="none" stroke="#444" stroke-width="18" stroke-linecap="round" opacity="0.5" />
+  <path d="M520 260c-36-28-96-48-150-36-34 8-56 32-80 36-40 8-78-18-118-10-42 9-86 45-86 45v120h520V300s-30-20-86-40z" fill="#555" opacity="0.7" />
+  <path d="M180 190c0 36-26 60-58 60s-58-24-58-60 26-72 58-72 58 36 58 72z" fill="#1d1d1d" />
+  <rect x="122" y="190" width="60" height="110" rx="22" fill="#161616" />
+  <path d="M94 300c22-28 92-28 114 0 9 11 9 44 9 44H85s0-33 9-44z" fill="#111" />
+  <rect x="270" y="180" width="70" height="140" rx="20" fill="#1f1f1f" />
+  <circle cx="305" cy="150" r="40" fill="#131313" />
+  <path d="M260 320c15-22 80-22 95 0 7 9 7 38 7 38H253s0-29 7-38z" fill="#0e0e0e" />
+  <path d="M460 170c0 34-24 56-54 56s-54-22-54-56 24-66 54-66 54 32 54 66z" fill="#2d2d2d" />
+  <rect x="410" y="170" width="40" height="100" rx="18" fill="#202020" />
+  <path d="M386 280c18-22 78-22 96 0 8 10 8 34 8 34H378s0-24 8-34z" fill="#191919" />
+</svg>

@@ -58,7 +58,7 @@ function SSBDrills() {
     {
       id: 3,
       title: "Group Discussion (GD)",
-      description: "Discuss PPDT stories - show leadership & confidence",
+      description: "Choose real lobby or AI-simulated GD with Gemini insights",
       icon: "👥",
       route: "/gd",
       category: "Day 1 Screening"

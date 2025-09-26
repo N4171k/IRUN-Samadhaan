@@ -28,6 +28,7 @@ global.GEMINI_API_KEYS = apiKeys;
 const tatRoutes = require('./routes/tatRoutes');
 const watRoutes = require('./routes/watRoutes');
 const oirRoutes = require('./routes/oirRoutes');
+const gdRoutes = require('./routes/gdRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -50,6 +51,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/tat', tatRoutes);
 app.use('/api/wat', watRoutes);
 app.use('/api/oir', oirRoutes);
+app.use('/api/gd', gdRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -82,6 +84,7 @@ app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
   console.log(`🎯 TAT API: http://localhost:${PORT}/api/tat`);
+  console.log(`🤝 GD API: http://localhost:${PORT}/api/gd`);
   console.log(`📝 WAT API: http://localhost:${PORT}/api/wat`);
   console.log(`🧠 OIR API: http://localhost:${PORT}/api/oir`);
 }).on('error', (err) => {
