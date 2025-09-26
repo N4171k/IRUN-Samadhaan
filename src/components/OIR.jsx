@@ -167,33 +167,53 @@ function OIR() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="glassmorphic-dashboard-layout">
+      {/* Aurora Background Effect */}
+      <div className="dashboard-aurora"></div>
+      
+      {/* Floating Background Shapes */}
+      <div className="dashboard-floating-shape shape-1"></div>
+      <div className="dashboard-floating-shape shape-2"></div>
+      <div className="dashboard-floating-shape shape-3"></div>
+      <div className="dashboard-floating-shape shape-4"></div>
+      <div className="dashboard-floating-shape shape-5"></div>
+      
+      {/* Sparkle Effects */}
+      <div className="dashboard-sparkle sparkle-1"></div>
+      <div className="dashboard-sparkle sparkle-2"></div>
+      <div className="dashboard-sparkle sparkle-3"></div>
+
       <Navbar userDetails={userDetails} onLogout={handleLogout} />
 
       {/* Breadcrumb Navigation */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-6xl mx-auto px-4 py-3">
-          <div className="flex items-center space-x-2 text-sm">
-            <button 
-              onClick={handleBackToSSB}
-              className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to SSB Drills</span>
-            </button>
-            <span className="text-gray-400">/</span>
-            <span className="text-gray-700 font-medium">Officer Intelligence Rating (OIR)</span>
-          </div>
+      <div className="glassmorphic-breadcrumb-nav">
+        <div className="glassmorphic-breadcrumb-container">
+          <button 
+            onClick={handleBackToSSB}
+            className="glassmorphic-breadcrumb-btn"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to SSB Drills</span>
+          </button>
+          <span className="breadcrumb-separator">/</span>
+          <span className="breadcrumb-current">Officer Intelligence Rating (OIR)</span>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <div className="glassmorphic-dashboard-wrapper">
+        <div className="glassmorphic-dashboard-card">
+          {/* Floating particles inside card */}
+          <div className="dashboard-particle particle-1"></div>
+          <div className="dashboard-particle particle-2"></div>
+          <div className="dashboard-particle particle-3"></div>
+
+          <div className="glassmorphic-dashboard-content">
             {/* Test Header */}
-            <div className="bg-gray-100 px-6 py-4 border-b">
-              <h1 className="text-xl font-semibold text-gray-800">
-                SSB Drills &gt; Officer Intelligence Rating (OIR)
+            <div className="glassmorphic-test-header">
+              <h1 className="test-page-title">
+                Officer Intelligence Rating (OIR)
+                <span className="progress-sparkle"></span>
               </h1>
             </div>
 
@@ -321,6 +341,7 @@ function OIR() {
             </div>
           )}
           </div>
+        </div>
       </div>
     </div>
   );

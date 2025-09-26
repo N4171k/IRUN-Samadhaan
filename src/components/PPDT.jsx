@@ -162,42 +162,67 @@ function PPDT() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="glassmorphic-dashboard-layout">
+      {/* Aurora Background Effect */}
+      <div className="dashboard-aurora"></div>
+      
+      {/* Floating Background Shapes */}
+      <div className="dashboard-floating-shape shape-1"></div>
+      <div className="dashboard-floating-shape shape-2"></div>
+      <div className="dashboard-floating-shape shape-3"></div>
+      <div className="dashboard-floating-shape shape-4"></div>
+      <div className="dashboard-floating-shape shape-5"></div>
+      
+      {/* Sparkle Effects */}
+      <div className="dashboard-sparkle sparkle-1"></div>
+      <div className="dashboard-sparkle sparkle-2"></div>
+      <div className="dashboard-sparkle sparkle-3"></div>
+
       <Navbar userDetails={userDetails} onLogout={handleLogout} />
 
       {/* Breadcrumb Navigation */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-6xl mx-auto px-4 py-3">
-          <div className="flex items-center space-x-2 text-sm">
-            <button 
-              onClick={handleBackToSSB}
-              className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to SSB Drills</span>
-            </button>
-            <span className="text-gray-400">/</span>
-            <span className="text-gray-700 font-medium">Picture Perception & Description Test (PPDT)</span>
-          </div>
+      <div className="glassmorphic-breadcrumb-nav">
+        <div className="glassmorphic-breadcrumb-container">
+          <button 
+            onClick={handleBackToSSB}
+            className="glassmorphic-breadcrumb-btn"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to SSB Drills</span>
+          </button>
+          <span className="breadcrumb-separator">/</span>
+          <span className="breadcrumb-current">Picture Perception & Description Test (PPDT)</span>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-          {/* Test Header */}
-          <div className="bg-gray-100 px-6 py-4 border-b">
-            <h1 className="text-xl font-semibold text-gray-800">
-              SSB Drills &gt; Picture Perception & Description Test (PPDT)
-            </h1>
-          </div>
+      <div className="glassmorphic-dashboard-wrapper">
+        <div className="glassmorphic-dashboard-card">
+          {/* Floating particles inside card */}
+          <div className="dashboard-particle particle-1"></div>
+          <div className="dashboard-particle particle-2"></div>
+          <div className="dashboard-particle particle-3"></div>
+
+          <div className="glassmorphic-dashboard-content">
+            {/* Test Header */}
+            <div className="glassmorphic-test-header">
+              <h1 className="test-page-title">
+                Picture Perception & Description Test (PPDT)
+                <span className="progress-sparkle"></span>
+              </h1>
+            </div>
 
           {/* Instructions */}
           {showInstructions && !testCompleted && (
-            <div className="p-6">
-              <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
-                <h2 className="text-lg font-semibold text-blue-900 mb-4">Instructions</h2>
-                <div className="space-y-3 text-blue-800">
+            <section className="glassmorphic-cards-section">
+              <div className="glassmorphic-card instruction-card">
+                <div className="card-glow instruction-glow"></div>
+                <div className="card-content">
+                  <h2 className="instruction-title">
+                    Instructions
+                    <span className="instruction-sparkle"></span>
+                  </h2>
+                  <div className="instruction-content">
                   <p><strong>What is PPDT?</strong></p>
                   <p>Picture Perception and Description Test now shows you a softly blurred, AI-generated hand-drawn comic-style monochrome scene for 30 seconds, then you have 4 minutes to write a story based on what you perceived.</p>
                   
@@ -222,27 +247,28 @@ function PPDT() {
                     </ul>
                   </div>
 
-                  <div className="bg-green-50 p-4 rounded-lg border border-green-200 mt-4">
-                    <h3 className="font-semibold text-green-800">What Assessors Look For:</h3>
-                    <ul className="list-disc list-inside text-green-700 space-y-1 mt-2">
-                      <li>Perception of the image</li>
-                      <li>Imagination and creativity</li>
-                      <li>Positive thinking</li>
-                      <li>Leadership orientation</li>
-                      <li>Problem-solving approach</li>
-                    </ul>
+                    <div className="instruction-highlight">
+                      <h3 className="highlight-title">What Assessors Look For:</h3>
+                      <ul className="highlight-list">
+                        <li>Perception of the image</li>
+                        <li>Imagination and creativity</li>
+                        <li>Positive thinking</li>
+                        <li>Leadership orientation</li>
+                        <li>Problem-solving approach</li>
+                      </ul>
+                    </div>
                   </div>
+                  
+                  <button 
+                    onClick={startTest} 
+                    className="glassmorphic-start-btn"
+                  >
+                    <Play className="w-5 h-5" />
+                    <span>Start PPDT Test</span>
+                  </button>
                 </div>
-                
-                <button 
-                  onClick={startTest} 
-                  className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium flex items-center space-x-2"
-                >
-                  <Play className="w-5 h-5" />
-                  <span>Start PPDT Test</span>
-                </button>
               </div>
-            </div>
+            </section>
           )}
 
           {/* Test Interface */}
@@ -452,6 +478,7 @@ function PPDT() {
               </div>
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>

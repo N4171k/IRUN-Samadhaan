@@ -135,47 +135,73 @@ function SSBDrills() {
   }
 
   return (
-    <div className="dashboard-layout">
+    <div className="glassmorphic-dashboard-layout">
+      {/* Aurora Background Effect */}
+      <div className="dashboard-aurora"></div>
+      
+      {/* Floating Background Shapes */}
+      <div className="dashboard-floating-shape shape-1"></div>
+      <div className="dashboard-floating-shape shape-2"></div>
+      <div className="dashboard-floating-shape shape-3"></div>
+      <div className="dashboard-floating-shape shape-4"></div>
+      <div className="dashboard-floating-shape shape-5"></div>
+      
+      {/* Sparkle Effects */}
+      <div className="dashboard-sparkle sparkle-1"></div>
+      <div className="dashboard-sparkle sparkle-2"></div>
+      <div className="dashboard-sparkle sparkle-3"></div>
+
       <Navbar userDetails={userDetails} onLogout={handleLogout} />
       
-      <div className="ssb-drills-container">
-        <div className="ssb-drills-content">
-          <div className="page-header">
-            <h1 className="page-title">SSB Drills</h1>
-          </div>
+      <div className="glassmorphic-dashboard-wrapper">
+        <div className="glassmorphic-dashboard-card">
+          {/* Floating particles inside card */}
+          <div className="dashboard-particle particle-1"></div>
+          <div className="dashboard-particle particle-2"></div>
+          <div className="dashboard-particle particle-3"></div>
 
-          {/* Categorize drills by phases */}
-          {['Screening Tests', 'Day 1 Screening', 'Day 2 Psychology', 'Group Task Officer', 'Interview', 'Final Phase'].map(category => {
-            const categoryDrills = drills.filter(drill => drill.category === category);
-            if (categoryDrills.length === 0) return null;
-            
-            return (
-              <div key={category} className="drill-category-section">
-                <h3 className="category-title">{category}</h3>
-                <div className="drills-list">
-                  {categoryDrills.map((drill) => (
-                    <div 
-                      key={drill.id} 
-                      className="drill-item cursor-pointer hover:bg-gray-50 transition-colors"
-                      onClick={() => handleDrillClick(drill)}
-                    >
-                      <div className="drill-icon-box">
-                        <span className="drill-icon">{drill.icon}</span>
-                      </div>
-                      
-                      <div className="drill-content">
-                        <h3 className="drill-title-text">{drill.title}</h3>
-                        <p className="drill-description">{drill.description}</p>
-                        <div className="drill-arrow">
+          <div className="glassmorphic-dashboard-content">
+            <div className="page-header">
+              <h1 className="page-title">
+                SSB Drills
+                <span className="progress-sparkle"></span>
+              </h1>
+            </div>
+
+            {/* Categorize drills by phases */}
+            {['Screening Tests', 'Day 1 Screening', 'Day 2 Psychology', 'Group Task Officer', 'Interview', 'Final Phase'].map(category => {
+              const categoryDrills = drills.filter(drill => drill.category === category);
+              if (categoryDrills.length === 0) return null;
+              
+              return (
+                <section key={category} className="glassmorphic-cards-section">
+                  <h3>{category}</h3>
+                  <div className="glassmorphic-cards-row">
+                    {categoryDrills.map((drill) => (
+                      <div 
+                        key={drill.id} 
+                        className="glassmorphic-card drill-card"
+                        onClick={() => handleDrillClick(drill)}
+                      >
+                        <div className="card-glow drill-glow"></div>
+                        <div className="card-content">
+                          <span className="card-icon">{drill.icon}</span>
+                          <span className="card-title">{drill.title}</span>
+                          <span className="card-subtitle">{drill.description}</span>
+                        </div>
+                        <div className="card-stats">
+                          <span className="card-stat">Ready</span>
+                        </div>
+                        <div className="drill-arrow-glassmorphic">
                           <ArrowRight className="w-5 h-5" />
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
         </div>
       </div>
       

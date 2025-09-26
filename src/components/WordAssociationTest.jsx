@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { account } from '../lib/appwrite';
 import Navbar from './Navbar';
-import { Play, Pause, RotateCcw, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Play, Pause, RotateCcw, Clock, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
 
 function WordAssociationTest() {
   const navigate = useNavigate();
@@ -230,20 +230,53 @@ function WordAssociationTest() {
   }
 
   return (
-    <div className="dashboard-layout">
+    <div className="glassmorphic-dashboard-layout">
+      {/* Aurora Background Effect */}
+      <div className="dashboard-aurora"></div>
+      
+      {/* Floating Background Shapes */}
+      <div className="dashboard-floating-shape shape-1"></div>
+      <div className="dashboard-floating-shape shape-2"></div>
+      <div className="dashboard-floating-shape shape-3"></div>
+      <div className="dashboard-floating-shape shape-4"></div>
+      <div className="dashboard-floating-shape shape-5"></div>
+      
+      {/* Sparkle Effects */}
+      <div className="dashboard-sparkle sparkle-1"></div>
+      <div className="dashboard-sparkle sparkle-2"></div>
+      <div className="dashboard-sparkle sparkle-3"></div>
+
       <Navbar userDetails={userDetails} onLogout={handleLogout} />
       
-      <div className="wat-container">
-          <div className="wat-content">
-          <div className="page-header">
-            <h1 className="page-title">Word Association Test (WAT)</h1>
-            <button 
-              onClick={() => navigate('/ssb-drills')}
-              className="back-button"
-            >
-              ← Back to SSB Drills
-            </button>
-          </div>
+      {/* Breadcrumb Navigation */}
+      <div className="glassmorphic-breadcrumb-nav">
+        <div className="glassmorphic-breadcrumb-container">
+          <button 
+            onClick={() => navigate('/ssb-drills')}
+            className="glassmorphic-breadcrumb-btn"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to SSB Drills</span>
+          </button>
+          <span className="breadcrumb-separator">/</span>
+          <span className="breadcrumb-current">Word Association Test (WAT)</span>
+        </div>
+      </div>
+      
+      <div className="glassmorphic-dashboard-wrapper">
+        <div className="glassmorphic-dashboard-card">
+          {/* Floating particles inside card */}
+          <div className="dashboard-particle particle-1"></div>
+          <div className="dashboard-particle particle-2"></div>
+          <div className="dashboard-particle particle-3"></div>
+
+          <div className="glassmorphic-dashboard-content">
+            <div className="glassmorphic-test-header">
+              <h1 className="test-page-title">
+                Word Association Test (WAT)
+                <span className="progress-sparkle"></span>
+              </h1>
+            </div>
 
           {showInstructions && !testCompleted && (
             <div className="wat-instructions">
@@ -427,6 +460,7 @@ function WordAssociationTest() {
             </div>
           )}
           </div>
+        </div>
       </div>
     </div>
   );
