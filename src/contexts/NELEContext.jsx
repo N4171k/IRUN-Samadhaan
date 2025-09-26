@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { neleService } from '../services/neleService';
+import { neleSocket } from '../lib/nele-socket.jsx';
 
 const NELEContext = createContext();
 
@@ -18,39 +19,50 @@ export const NELEProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [currentSession, setCurrentSession] = useState(null);
 
-  const startMonitoring = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await neleService.startMonitoring();
-      setCurrentSession(response);
-      setIsMonitoring(true);
-      setNeleEnabled(true);
-    } catch (err) {
-      setError(err.message);
-      setIsMonitoring(false);
-      setNeleEnabled(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    // Connect/disconnect socket when monitoring state changes
+    useEffect(() => {
+        if (isMonitoring) {
+            neleSocket.connect();
+        } else {
+            neleSocket.disconnect();
+        }
+        
+        return () => {
+            neleSocket.disconnect();
+        };
+    }, [isMonitoring]);
 
-  const stopMonitoring = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await neleService.stopMonitoring();
-      setCurrentSession(response);
-      setIsMonitoring(false);
-      setNeleEnabled(false);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    const startMonitoring = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const response = await neleService.startMonitoring();
+            setCurrentSession(response);
+            setIsMonitoring(true);
+            setNeleEnabled(true);
+        } catch (err) {
+            setError(err.message);
+            setIsMonitoring(false);
+            setNeleEnabled(false);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-  const toggleNELE = async () => {
+    const stopMonitoring = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const response = await neleService.stopMonitoring();
+            setCurrentSession(response);
+            setIsMonitoring(false);
+            setNeleEnabled(false);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };  const toggleNELE = async () => {
     if (isMonitoring) {
       await stopMonitoring();
     } else {

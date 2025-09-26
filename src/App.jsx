@@ -14,6 +14,7 @@ import EmotionAnalysis from './pages/EmotionAnalysis';
 import ThematicApperceptionTest from './components/ThematicApperceptionTest';
 import WordAssociationTest from './components/WordAssociationTest';
 import OIR from './components/OIR';
+import { NELEToast } from './components/NELEToast';
 import PPDT from './components/PPDT';
 import GroupDiscussion from './components/GroupDiscussion';
 import SRT from './components/SRT';
@@ -24,11 +25,11 @@ import ConferenceTips from './components/ConferenceTips';
 
 
 function App() {
-  // Initialize routing
   return (
     <NELEProvider>
       <BrowserRouter>
-      <Routes>
+        <NELEToast />
+        <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
