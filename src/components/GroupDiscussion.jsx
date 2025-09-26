@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { account } from '../lib/appwrite';
 import Navbar from './Navbar';
-import { ArrowLeft, Users, Mic, MicOff, Volume2, VolumeX, Timer } from 'lucide-react';
+import AIGDPractice from './AIGDPractice';
+import { ArrowLeft, Users, Timer, Bot, Megaphone } from 'lucide-react';
 
 function GroupDiscussion() {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ function GroupDiscussion() {
   const [isLoading, setIsLoading] = useState(true);
   
   // GD State
+  const [mode, setMode] = useState('real');
   const [gdStarted, setGdStarted] = useState(false);
   const [currentPhase, setCurrentPhase] = useState('preparation'); // preparation, discussion, conclusion
   const [timeRemaining, setTimeRemaining] = useState(900); // 15 minutes
@@ -76,8 +78,18 @@ function GroupDiscussion() {
   }, []);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (userStory && userStory.trim().length > 0) {
+        localStorage.setItem('ppdtStory', userStory);
+      } else {
+        localStorage.removeItem('ppdtStory');
+      }
+    }
+  }, [userStory]);
+
+  useEffect(() => {
     let timer;
-    if (gdStarted && timeRemaining > 0) {
+    if (mode === 'real' && gdStarted && timeRemaining > 0) {
       timer = setInterval(() => {
         setTimeRemaining(prev => {
           if (prev <= 1) {
@@ -92,7 +104,19 @@ function GroupDiscussion() {
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [gdStarted, timeRemaining]);
+  }, [gdStarted, timeRemaining, mode]);
+
+  useEffect(() => {
+    if (mode !== 'real') {
+      setGdStarted(false);
+      setShowInstructions(false);
+      setCurrentPhase('preparation');
+    } else {
+      setShowInstructions(true);
+      setTimeRemaining(900);
+      setCurrentPhase('preparation');
+    }
+  }, [mode]);
 
   const handleLogout = async () => {
     try {
@@ -177,8 +201,63 @@ function GroupDiscussion() {
             </h1>
           </div>
 
+          <div className="p-6 border-b bg-white">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">Choose your GD practice mode</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => setMode('real')}
+                className={`text-left p-4 rounded-xl border transition-all ${
+                  mode === 'real'
+                    ? 'border-blue-500 bg-blue-50 shadow-md'
+                    : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/60'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Megaphone className={`w-6 h-6 ${mode === 'real' ? 'text-blue-600' : 'text-gray-500'}`} />
+                  <div>
+                    <p className="font-semibold text-gray-900">Real GD Lobby</p>
+                    <p className="text-sm text-gray-600">
+                      Practice the traditional PPDT follow-up with timers, self-assessment, and manual note taking.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3 text-xs text-gray-500">
+                  Mimics live GD dynamics with manual controls. Great for simulating assessment room pressure.
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode('ai')}
+                className={`text-left p-4 rounded-xl border transition-all ${
+                  mode === 'ai'
+                    ? 'border-purple-500 bg-purple-50 shadow-md'
+                    : 'border-gray-200 hover:border-purple-300 hover:bg-purple-50/60'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Bot className={`w-6 h-6 ${mode === 'ai' ? 'text-purple-600' : 'text-gray-500'}`} />
+                  <div>
+                    <p className="font-semibold text-gray-900">AI Simulated GD</p>
+                    <p className="text-sm text-gray-600">
+                      Gemini powered multilingual GD with four AI candidates, idea bank, translation, and TTS/STT helpers.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3 text-xs text-gray-500">
+                  Receive real-time transcripts, assessor summary, and optional speech playback for immersive practice.
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* AI Simulation */}
+          {mode === 'ai' && (
+            <AIGDPractice story={userStory} onStoryChange={setUserStory} />
+          )}
+
           {/* Instructions */}
-          {showInstructions && (
+          {mode === 'real' && showInstructions && (
             <div className="p-6">
               <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
                 <h2 className="text-lg font-semibold text-blue-900 mb-4">Group Discussion Instructions</h2>
@@ -248,7 +327,7 @@ function GroupDiscussion() {
           )}
 
           {/* GD Interface */}
-          {gdStarted && (
+          {mode === 'real' && gdStarted && (
             <div className="p-6">
               {/* Timer and Status */}
               <div className="flex justify-between items-center mb-6 p-4 bg-gray-50 rounded-lg">
@@ -412,7 +491,7 @@ function GroupDiscussion() {
           )}
 
           {/* GD Results */}
-          {currentPhase === 'conclusion' && (
+          {mode === 'real' && currentPhase === 'conclusion' && (
             <div className="p-6">
               <div className="bg-green-50 rounded-lg p-6 border border-green-200">
                 <h2 className="text-xl font-semibold text-green-900 mb-4">Group Discussion Completed!</h2>
