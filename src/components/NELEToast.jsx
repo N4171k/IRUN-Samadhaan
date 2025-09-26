@@ -4,14 +4,20 @@ export function NELEToast() {
     const [toasts, setToasts] = useState([]);
 
     useEffect(() => {
+        console.log('🎯 NELEToast: Component mounted');
+        
         const handleToast = (event) => {
+            console.log('📥 NELEToast: Received toast event:', event.detail);
             const toast = event.detail;
             const id = Math.random().toString(36).substring(2, 9);
             
+            console.log('⚡ NELEToast: Adding new toast with ID:', id);
             setToasts(prev => [...prev, { ...toast, id }]);
 
             if (toast.duration > 0) {
+                console.log(`⏲️ NELEToast: Setting timeout for ${toast.duration}ms`);
                 setTimeout(() => {
+                    console.log('🗑️ NELEToast: Removing toast:', id);
                     setToasts(prev => prev.filter(t => t.id !== id));
                 }, toast.duration);
             }

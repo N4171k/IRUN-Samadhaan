@@ -44,11 +44,15 @@ class NELESocketService {
     }
 
     handleWellnessAlert(alertData) {
+        console.log('🎯 Handling wellness alert:', alertData);
+        
         const { type, title: alertTitle, message, emotion, confidence } = alertData;
         
         // Use the message from the backend or fallback to custom message
         let customMessage = message;
         let title = alertTitle || "Wellness Alert";
+        
+        console.log('📝 Preparing toast notification:', { title, customMessage, type });
         
         const showBreathingExerciseAction = () => (
             <button
