@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useNELE } from '../contexts/NELEContext';
+import { NELEToggle } from './NELEToggle';
+import { NELEStats } from './NELEStats';
 
 function Navbar({ userDetails, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [profileOpen, setProfileOpen] = useState(false);
-  const { neleEnabled, toggleNELE, isMonitoring } = useNELE();
+
   const profileRef = useRef(null);
 
   // Close dropdown when clicking outside
@@ -118,20 +119,9 @@ function Navbar({ userDetails, onLogout }) {
           <div className="ai-button-particles"></div>
         </button>
         
-        <div className="nele-section">
-          <span className="nele-label">NELE AI {isMonitoring && '🔴'}</span>
-          <label className="glassmorphic-switch">
-            <input 
-              type="checkbox" 
-              className="switch-input" 
-              checked={neleEnabled}
-              onChange={(e) => toggleNELE(e.target.checked)}
-            />
-            <span className="glassmorphic-switch-slider">
-              <span className="switch-handle"></span>
-              <div className="switch-glow"></div>
-            </span>
-          </label>
+        <div className="nele-section flex items-center gap-2">
+          <NELEToggle />
+          <NELEStats />
         </div>
         
         <div className="profile-section" ref={profileRef}>

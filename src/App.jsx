@@ -10,6 +10,7 @@ import SSBDrills from './pages/SSBDrills';
 import TestPrep from './pages/TestPrep';
 import AIRun from './pages/AIRun';
 import NoteSynthesizer from './pages/ai-features/NoteSynthesizer';
+import EmotionAnalysis from './pages/EmotionAnalysis';
 import ThematicApperceptionTest from './components/ThematicApperceptionTest';
 import WordAssociationTest from './components/WordAssociationTest';
 import OIR from './components/OIR';
@@ -37,6 +38,7 @@ function App() {
         <Route path="/test-prep" element={<TestPrep />} />
         <Route path="/ai-run" element={<AIRun />} />
         <Route path="/ai-run/note-synthesizer" element={<NoteSynthesizer />} />
+        <Route path="/emotion-analysis" element={<EmotionAnalysis />} />
 
         <Route path="/tat" element={<ThematicApperceptionTest />} />
         <Route path="/wat" element={<WordAssociationTest />} />
