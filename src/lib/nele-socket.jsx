@@ -14,17 +14,23 @@ class NELESocketService {
         this.socket = io('http://localhost:5000');
 
         this.socket.on('connect', () => {
-            console.log('Connected to NELE server');
+            console.log('🟢 Connected to NELE server');
             this.isConnected = true;
+            console.log('🔔 Subscribing to alerts...');
             this.socket.emit('subscribe_alerts');
         });
 
         this.socket.on('disconnect', () => {
-            console.log('Disconnected from NELE server');
+            console.log('🔴 Disconnected from NELE server');
             this.isConnected = false;
         });
 
+        this.socket.on('subscription_confirmed', (data) => {
+            console.log('✅ Alert subscription confirmed:', data);
+        });
+
         this.socket.on('wellness_alert', (alertData) => {
+            console.log('Received wellness alert:', alertData);
             this.handleWellnessAlert(alertData);
         });
     }
@@ -38,68 +44,58 @@ class NELESocketService {
     }
 
     handleWellnessAlert(alertData) {
-        const { type, message, emotion, confidence } = alertData;
+        const { type, title: alertTitle, message, emotion, confidence } = alertData;
         
-        // Custom message based on emotion type
+        // Use the message from the backend or fallback to custom message
         let customMessage = message;
-        let title = "Wellness Alert";
+        let title = alertTitle || "Wellness Alert";
         
-        if (type === 'stress' || emotion?.toLowerCase() === 'stressed') {
-            title = "⚠️ Stress Detected";
-            customMessage = "You seem stressed! Take a deep breath and consider a short break to recover.";
-            // Show stress notification
-            toast({
-                title,
-                description: customMessage,
-                variant: 'destructive',
-                duration: 8000,
-                action: {
-                    label: 'Take Break',
-                    onClick: () => {
-                        // You can add break timer functionality here
-                        console.log('User taking a break');
-                    }
-                }
-            });
-        } else if (type === 'distraction') {
-            title = "🔔 Focus Alert";
-            customMessage = "You seem distracted! Let's get back to focusing on your task.";
-            // Show distraction notification
-            toast({
-                title,
-                description: customMessage,
-                variant: 'warning',
-                duration: 6000,
-                action: {
-                    label: 'Refocus',
-                    onClick: () => {
-                        // You can add refocus exercises here
-                        console.log('User refocusing');
-                    }
-                }
-            });
-        }
-
-        const ToastAction = () => (
+        const showBreathingExerciseAction = () => (
             <button
-                className="text-xs underline"
+                className="text-xs bg-white px-2 py-1 rounded hover:bg-gray-100"
                 onClick={() => this.showBreathingExercise()}
             >
                 Try breathing exercise
             </button>
         );
 
-        // Show toast notification
-        toast({
-            title: `${emotion} Detected`,
-            description: customMessage,
-            variant: type === 'stress' || emotion.toLowerCase() === 'stressed' ? 'destructive' : 'warning',
-            duration: 5000,
-            action: (type === 'stress' || emotion.toLowerCase() === 'stressed') ? <ToastAction /> : undefined
-        });
+        if (type === 'stress' || emotion?.toLowerCase() === 'stressed') {
+            title = title || "⚠️ Stress Detected";
+            customMessage = customMessage || "You seem stressed! Take a deep breath and consider a short break to recover.";
+            
+            toast({
+                title,
+                description: `${customMessage} (Confidence: ${confidence.toFixed(1)}%)`,
+                variant: 'destructive',
+                duration: 8000,
+                action: showBreathingExerciseAction
+            });
+            
+            this.playAlertSound();
 
-        // Optional: Play a subtle sound
-        this.playAlertSound();
+        } else if (type === 'distraction') {
+            title = title || "🔔 Focus Alert";
+            customMessage = customMessage || "You seem distracted! Let's get back to focusing on your task.";
+            
+            toast({
+                title,
+                description: `${customMessage} (Confidence: ${confidence.toFixed(1)}%)`,
+                variant: 'warning',
+                duration: 6000,
+                action: {
+                    label: 'Refocus',
+                    onClick: () => {
+                        toast({
+                            title: "Refocus Exercise",
+                            description: "Take 30 seconds to observe your surroundings, then return to your task with renewed focus.",
+                            duration: 5000
+                        });
+                    }
+                }
+            });
+            
+            this.playAlertSound();
+        }
     }
 
     playAlertSound() {
