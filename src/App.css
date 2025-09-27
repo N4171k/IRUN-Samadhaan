@@ -2348,7 +2348,7 @@ Z-INDEX HIERARCHY:
     width: 28px;
     height: 28px;
   }
-}
+
 .chat-button {
   margin-top: auto;
   padding: 1rem;
@@ -7807,10 +7807,8 @@ body {
     max-width: 100%;
     box-sizing: border-box;
   }
-}
 
-/* Enhanced Dashboard Mobile Fixes */
-@media (max-width: 768px) {
+  /* Enhanced Dashboard Mobile Fixes */
   .glassmorphic-dashboard-layout {
     width: 100%;
     max-width: 100vw;
@@ -7856,20 +7854,16 @@ body {
     box-sizing: border-box;
     margin: 0;
   }
-}
 
-/* Enhanced Navbar Mobile Fixes */
-@media (max-width: 768px) {
+  /* Enhanced Navbar Mobile Fixes */
   .glassmorphic-navbar {
     width: calc(100% - 1rem);
     max-width: calc(100% - 1rem);
     margin: 0.5rem;
     box-sizing: border-box;
   }
-}
 
-/* Small Mobile Devices */
-@media (max-width: 480px) {
+  /* Small Mobile Devices */
   .glassmorphic-dashboard-wrapper {
     padding: 0.5rem;
     gap: 1rem;
