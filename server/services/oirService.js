@@ -252,26 +252,39 @@ Generate unique, challenging questions suitable for CDS officer selection. Retur
   }
 
   // Evaluate test submission
-  evaluateTest(testId, userAnswers) {
+  evaluateTest(testId, userAnswers, timeTaken = 0) {
     try {
       const testData = this.loadTestData();
       const answerKey = testData.answer_key;
       
       let correctAnswers = 0;
       let totalQuestions = Object.keys(answerKey).length;
+      let attemptedQuestions = 0;
       let results = [];
+      let verbalCorrect = 0;
+      let nonVerbalCorrect = 0;
+      let verbalTotal = 0;
+      let nonVerbalTotal = 0;
 
       // Evaluate each answer
       for (const [questionId, userAnswer] of Object.entries(userAnswers)) {
         const correctAnswer = answerKey[questionId];
         let isCorrect = false;
 
+        if (userAnswer !== null && userAnswer !== undefined) {
+          attemptedQuestions++;
+        }
+
         if (typeof correctAnswer === 'string') {
           // Verbal question
+          verbalTotal++;
           isCorrect = userAnswer === correctAnswer;
+          if (isCorrect) verbalCorrect++;
         } else {
           // Non-verbal question - compare objects
+          nonVerbalTotal++;
           isCorrect = this.compareNonVerbalAnswers(userAnswer, correctAnswer);
+          if (isCorrect) nonVerbalCorrect++;
         }
 
         if (isCorrect) {
@@ -279,14 +292,17 @@ Generate unique, challenging questions suitable for CDS officer selection. Retur
         }
 
         results.push({
-          question_id: questionId,
+          question_id: parseInt(questionId),
           user_answer: userAnswer,
           correct_answer: correctAnswer,
           is_correct: isCorrect
         });
       }
 
+      // Calculate scores
       const score = Math.round((correctAnswers / totalQuestions) * 100);
+      const verbalScore = verbalTotal > 0 ? Math.round((verbalCorrect / verbalTotal) * 100) : 0;
+      const nonVerbalScore = nonVerbalTotal > 0 ? Math.round((nonVerbalCorrect / nonVerbalTotal) * 100) : 0;
       const percentile = this.calculatePercentile(score);
 
       return {
@@ -296,8 +312,13 @@ Generate unique, challenging questions suitable for CDS officer selection. Retur
           score: score,
           correct_answers: correctAnswers,
           total_questions: totalQuestions,
+          attempted_questions: attemptedQuestions,
+          unattempted_questions: totalQuestions - attemptedQuestions,
+          verbal_score: verbalScore,
+          non_verbal_score: nonVerbalScore,
           percentile: percentile,
           performance_level: this.getPerformanceLevel(score),
+          time_taken: timeTaken,
           results: results,
           evaluated_at: new Date().toISOString()
         }

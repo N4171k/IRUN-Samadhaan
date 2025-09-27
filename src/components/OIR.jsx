@@ -7,6 +7,7 @@ import VerbalQuestion from './oir/VerbalQuestion';
 import NonVerbalQuestion from './oir/NonVerbalQuestion';
 import TestTimer from './oir/TestTimer';
 import TestResults from './oir/TestResults';
+import DetailedOIRReport from './oir/DetailedOIRReport';
 import ErrorBoundary from './oir/ErrorBoundary';
 import OIRTestService from '../services/oirTestService';
 
@@ -333,10 +334,14 @@ function OIR() {
           {/* Test Results */}
           {testCompleted && testResults && (
             <div className="p-6">
-              <TestResults 
+              <DetailedOIRReport 
                 results={testResults}
+                testData={testData}
+                userDetails={userDetails}
+                questions={questions}
+                answers={answers}
                 onRetakeTest={resetTest}
-                onBackToSSB={handleBackToSSB}
+                onBackToDrills={handleBackToSSB}
               />
             </div>
           )}
