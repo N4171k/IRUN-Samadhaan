@@ -37,12 +37,10 @@ router.post('/submit-test', (req, res) => {
       });
     }
     
-    // Evaluate the test
-    const result = oirService.evaluateTest(test_id, answers);
+    // Evaluate the test with time taken
+    const result = oirService.evaluateTest(test_id, answers, time_taken || 0);
     
     if (result.success) {
-      // Add time taken to the result
-      result.data.time_taken = time_taken || 0;
       res.status(200).json(result);
     } else {
       res.status(500).json(result);

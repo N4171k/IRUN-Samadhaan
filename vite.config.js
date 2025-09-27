@@ -10,6 +10,7 @@ export default defineConfig({
     include: /\.[jt]sx?$/
   },
   optimizeDeps: {
+    exclude: ['pdfjs-dist'],
     esbuildOptions: {
       loader: {
         '.js': 'jsx'

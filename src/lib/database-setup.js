@@ -65,6 +65,17 @@ export const DATABASE_SCHEMA = {
         { key: 'userId', type: 'string', size: 100, required: true },
         { key: 'postId', type: 'string', size: 100, required: true }
       ]
+    },
+    userPreferences: {
+      id: 'user_preferences',
+      name: 'User Preferences',
+      attributes: [
+        { key: 'userId', type: 'string', size: 100, required: true },
+        { key: 'wantsNewsletter', type: 'boolean', required: true },
+        { key: 'newsletterTime', type: 'string', size: 10, required: false },
+        { key: 'createdAt', type: 'datetime', required: true },
+        { key: 'updatedAt', type: 'datetime', required: true }
+      ]
     }
   }
 };

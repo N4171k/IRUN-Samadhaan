@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 function SubjectCategories({ onSubjectSelect, selectedSubject = null }) {
   const subjects = [
@@ -7,7 +7,7 @@ function SubjectCategories({ onSubjectSelect, selectedSubject = null }) {
       name: 'English',
       description: 'Grammar, Comprehension, Vocabulary',
       icon: '📚',
-      color: '#4a90e2',
+      color: '#667eea',
       paperCount: 15
     },
     {
@@ -15,7 +15,7 @@ function SubjectCategories({ onSubjectSelect, selectedSubject = null }) {
       name: 'General Knowledge',
       description: 'Current Affairs, History, Geography',
       icon: '🌍',
-      color: '#7b68ee',
+      color: '#764ba2',
       paperCount: 12
     },
     {
@@ -23,7 +23,7 @@ function SubjectCategories({ onSubjectSelect, selectedSubject = null }) {
       name: 'Elementary Mathematics',
       description: 'Arithmetic, Algebra, Geometry',
       icon: '🔢',
-      color: '#ff6b35',
+      color: '#f093fb',
       paperCount: 18
     }
   ];
@@ -35,7 +35,7 @@ function SubjectCategories({ onSubjectSelect, selectedSubject = null }) {
   };
 
   return (
-    <div className="subject-categories-container">
+    <div className="glassmorphic-dashboard-card">
       <div className="categories-header">
         <h2 className="categories-title">Select Subject Category</h2>
         <p className="categories-subtitle">Choose a subject to view previous year papers</p>
@@ -58,34 +58,27 @@ function SubjectCategories({ onSubjectSelect, selectedSubject = null }) {
 function SubjectCard({ subject, isSelected, onClick }) {
   return (
     <div 
-      className={`subject-card ${isSelected ? 'selected' : ''}`}
+      className={`glassmorphic-card subject-card ${isSelected ? 'selected' : ''}`}
       onClick={onClick}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && onClick()}
-      style={{ '--subject-color': subject.color }}
     >
-      <div className="subject-icon">
-        <span>{subject.icon}</span>
-      </div>
-      
-      <div className="subject-content">
-        <h3 className="subject-name">{subject.name}</h3>
-        <p className="subject-description">{subject.description}</p>
+      <div className="card-glow"></div>
+      <div className="card-content">
+        <div className="subject-icon" style={{ background: `linear-gradient(135deg, ${subject.color}, ${subject.color}dd)` }}>
+          <span>{subject.icon}</span>
+        </div>
         
-        <div className="subject-stats">
-          <div className="paper-count">
-            <span className="count-number">{subject.paperCount}</span>
-            <span className="count-label">Previous Papers</span>
-          </div>
+        <div className="subject-content">
+          <h3 className="card-title">{subject.name}</h3>
+          <p className="card-subtitle">{subject.description}</p>
           
-          <div className="difficulty-indicator">
-            <div className="difficulty-bars">
-              <div className="bar active"></div>
-              <div className="bar active"></div>
-              <div className="bar"></div>
+          <div className="subject-stats">
+            <div className="paper-count">
+              <span className="count-number" style={{ color: subject.color }}>{subject.paperCount}</span>
+              <span className="count-label">Previous Papers</span>
             </div>
-            <span className="difficulty-label">Moderate</span>
           </div>
         </div>
       </div>

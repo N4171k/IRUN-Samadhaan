@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { account, ID } from '../lib/appwrite';
+import { account, ID, databases, Query } from '../lib/appwrite';
+import NewsletterPreference from '../components/NewsletterPreference';
+import { sendWelcomeNewsletter } from '../services/newsletterService';
 
 function SignUp() {
     const navigate = useNavigate();
     const [user, setUser] = useState({ name: '', email: '', password: '' });
+    const [newsletterPreference, setNewsletterPreference] = useState({ 
+        wantsNewsletter: false, 
+        sendTime: '08:00' 
+    });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -39,8 +45,38 @@ function SignUp() {
                 // User is not logged in, proceed with signup
             }
             
-            await account.create(ID.unique(), user.email, user.password, user.name);
+            // Create the user account
+            const createdUser = await account.create(ID.unique(), user.email, user.password, user.name);
             setSuccess('Account created successfully! Please sign in.');
+            
+            // Send welcome newsletter immediately
+            try {
+                await sendWelcomeNewsletter({ name: user.name, email: user.email });
+                console.log('Welcome newsletter sent successfully');
+            } catch (welcomeError) {
+                console.error('Failed to send welcome newsletter:', welcomeError);
+            }
+            
+            // Save user preferences to database
+            try {
+                const now = new Date().toISOString();
+                await databases.createDocument(
+                    import.meta.env.VITE_APPWRITE_DATABASE_ID || 'community_db',
+                    'user_preferences',
+                    ID.unique(),
+                    {
+                        userId: createdUser.$id,
+                        email: user.email, // Store the user's email for newsletter sending
+                        wantsNewsletter: newsletterPreference.wantsNewsletter,
+                        newsletterTime: newsletterPreference.sendTime,
+                        createdAt: now,
+                        updatedAt: now
+                    }
+                );
+                console.log('User preferences saved successfully');
+            } catch (dbError) {
+                console.error('Failed to save user preferences:', dbError);
+            }
             
             // Redirect to login after a short delay
             setTimeout(() => {
@@ -207,6 +243,10 @@ function SignUp() {
                             minLength={8}
                         />
                     </div>
+                    
+                    <NewsletterPreference 
+                        onPreferenceChange={setNewsletterPreference}
+                    />
                     
                     <button type="submit" className="auth-button" disabled={loading}>
                         {loading ? (

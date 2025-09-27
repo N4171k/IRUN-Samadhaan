@@ -25,6 +25,7 @@ export { ID, Query }; // Export ID and Query for creating unique user IDs and qu
 export const DATABASE_ID = 'community_db';
 export const POSTS_COLLECTION_ID = 'posts';
 export const COMMENTS_COLLECTION_ID = 'comments';
+export const USER_PREFERENCES_COLLECTION_ID = 'user_preferences';
 
 // Storage Bucket ID
 export const STORAGE_BUCKET_ID = 'community_files';

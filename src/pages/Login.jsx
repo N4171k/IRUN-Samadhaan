@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { account } from '../lib/appwrite';
+import { sendWelcomeBackNewsletter } from '../services/newsletterService';
 
 function Login() {
     const navigate = useNavigate();
@@ -31,6 +32,15 @@ function Login() {
             }
             
             await account.createEmailPasswordSession(credentials.email, credentials.password);
+            
+            // Send welcome back newsletter
+            try {
+                await sendWelcomeBackNewsletter({ name: 'User', email: credentials.email });
+                console.log('Welcome back newsletter sent successfully');
+            } catch (welcomeError) {
+                console.error('Failed to send welcome back newsletter:', welcomeError);
+            }
+            
             navigate('/dashboard');
         } catch (error) {
             console.error('Failed to login:', error);
