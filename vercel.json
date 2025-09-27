@@ -9,8 +9,7 @@
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
-        "nodeVersion": "18.x",
-        "buildCommand": "npm run build"
+        "nodeVersion": "18.x"
       }
     }
   ],
@@ -20,11 +19,6 @@
       "dest": "/index.html"
     }
   ],
-  "functions": {
-    "app/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "env": {
     "NODE_VERSION": "18"
   }
