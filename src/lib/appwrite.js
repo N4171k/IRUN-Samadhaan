@@ -1,5 +1,16 @@
 import { Client, Account, Databases, Storage, ID, Query } from 'appwrite';
 
+// Validate environment variables
+if (!import.meta.env.VITE_APPWRITE_ENDPOINT) {
+    console.error('VITE_APPWRITE_ENDPOINT is not defined. Please check your .env file.');
+    throw new Error('Missing Appwrite endpoint configuration');
+}
+
+if (!import.meta.env.VITE_APPWRITE_PROJECT_ID) {
+    console.error('VITE_APPWRITE_PROJECT_ID is not defined. Please check your .env file.');
+    throw new Error('Missing Appwrite project ID configuration');
+}
+
 const client = new Client();
 client
     .setEndpoint(import.meta.env.VITE_APPWRITE_ENDPOINT)

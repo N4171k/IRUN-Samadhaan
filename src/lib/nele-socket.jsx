@@ -46,7 +46,7 @@ class NELESocketService {
         
         if (type === 'stress' || emotion?.toLowerCase() === 'stressed') {
             title = "⚠️ Stress Detected";
-            customMessage = "You seem stressed! Take a deep breath and consider a short break to recover.";
+            customMessage = "You seem stressed!!!!!! consider a short break to recover. or have a chat with a mentor at iRUN.";
             // Show stress notification
             toast({
                 title,
