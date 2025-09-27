@@ -56,7 +56,7 @@ async function fetchNews() {
     if (API_CONFIG.NEWS_API.key) {
       console.log('🔍 Fetching from News API...');
       const newsApiUrl = `${API_CONFIG.NEWS_API.baseUrl}/top-headlines?` +
-        `category=military&pageSize=5&apiKey=${API_CONFIG.NEWS_API.key}`;
+        `category=military&language=en&pageSize=5&apiKey=${API_CONFIG.NEWS_API.key}`;
       
       const response = await fetch(newsApiUrl, { timeout: 10000 }); // 10 second timeout
       if (response.ok) {
@@ -77,7 +77,7 @@ async function fetchNews() {
     if (API_CONFIG.GNEWS_API.key) {
       console.log('🔍 Fetching from GNews API...');
       const gnewsUrl = `${API_CONFIG.GNEWS_API.baseUrl}/top-headlines?` +
-        `topic=military defense&max=5&apikey=${API_CONFIG.GNEWS_API.key}`;
+        `topic=military defense&lang=en&max=5&apikey=${API_CONFIG.GNEWS_API.key}`;
       
       const response = await fetch(gnewsUrl, { timeout: 10000 }); // 10 second timeout
       if (response.ok) {
@@ -98,7 +98,7 @@ async function fetchNews() {
     if (API_CONFIG.CURRENTS_API.key) {
       console.log('🔍 Fetching from Currents API...');
       const currentsUrl = `${API_CONFIG.CURRENTS_API.baseUrl}/latest-news?` +
-        `category=military&limit=5&apiKey=${API_CONFIG.CURRENTS_API.key}`;
+        `category=military&language=en&limit=5&apiKey=${API_CONFIG.CURRENTS_API.key}`;
       
       const response = await fetch(currentsUrl, { timeout: 10000 }); // 10 second timeout
       if (response.ok) {
@@ -119,7 +119,7 @@ async function fetchNews() {
     if (API_CONFIG.MEDIASTACK_API.key) {
       console.log('🔍 Fetching from Mediastack API...');
       const mediastackUrl = `${API_CONFIG.MEDIASTACK_API.baseUrl}/news?` +
-        `categories=military&limit=5&access_key=${API_CONFIG.MEDIASTACK_API.key}`;
+        `categories=military&languages=en&limit=5&access_key=${API_CONFIG.MEDIASTACK_API.key}`;
       
       const response = await fetch(mediastackUrl, { timeout: 10000 }); // 10 second timeout
       if (response.ok) {
@@ -137,8 +137,30 @@ async function fetchNews() {
   
   console.log(`📊 Total articles fetched: ${allArticles.length}`);
   
+  // Filter for English articles only
+  const englishArticles = allArticles.filter(article => {
+    // Check if article has language info and is English
+    if (article.language) {
+      return article.language === 'en' || article.language === 'english';
+    }
+    // Check if article has source info with English language
+    if (article.source && article.source.language) {
+      return article.source.language === 'en' || article.source.language === 'english';
+    }
+    // Check title and description for English words
+    const title = (article.title || '').toLowerCase();
+    const description = (article.description || '').toLowerCase();
+    const content = title + ' ' + description;
+    
+    // Simple heuristic: if it contains English words, assume it's English
+    const commonEnglishWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from'];
+    return commonEnglishWords.some(word => content.includes(word));
+  });
+  
+  console.log(`📊 English articles after language filter: ${englishArticles.length}`);
+  
   // Filter and deduplicate articles
-  const uniqueArticles = deduplicateArticles(allArticles);
+  const uniqueArticles = deduplicateArticles(englishArticles);
   console.log(`📊 Unique articles after deduplication: ${uniqueArticles.length}`);
   return uniqueArticles.slice(0, 15); // Return top 15 articles
 }
@@ -300,6 +322,7 @@ function formatNewsletter(articles) {
       <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #7f8c8d; font-size: 14px;">
         <p>This newsletter is sent daily to help you stay updated with relevant current affairs for CDS preparation.</p>
         <p>Best of luck with your preparation! 🎖️</p>
+        <p><a href="https://www.irun.co.in" style="color: #3498db; text-decoration: none;">Visit our website: www.irun.co.in</a></p>
       </div>
     </div>`;
   }
@@ -350,6 +373,7 @@ function formatNewsletter(articles) {
       <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #7f8c8d; font-size: 14px;">
         <p>This newsletter is sent daily to help you stay updated with relevant current affairs for CDS preparation.</p>
         <p>Best of luck with your preparation! 🎖️</p>
+        <p><a href="https://www.irun.co.in" style="color: #3498db; text-decoration: none;">Visit our website: www.irun.co.in</a></p>
       </div>
     </div>
   `;
