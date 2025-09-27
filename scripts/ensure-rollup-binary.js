@@ -10,6 +10,10 @@ const TARGET_DEPENDENCIES = [
     name: '@tailwindcss/oxide-linux-x64-gnu',
     version: '4.0.14',
   },
+  {
+    name: 'lightningcss-linux-x64-gnu',
+    version: '1.29.2',
+  },
 ];
 
 const require = createRequire(import.meta.url);
