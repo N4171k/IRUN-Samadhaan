@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { account } from '../lib/appwrite';
 import Navbar from './Navbar';
-import AIGDPractice from './AIGDPractice';
+import AIGDSimulator from './AIGDSimulator';
+import ErrorBoundary from './ErrorBoundary';
 import { ArrowLeft, Users, Timer, Bot, Megaphone } from 'lucide-react';
 
 function GroupDiscussion() {
@@ -253,7 +254,9 @@ function GroupDiscussion() {
 
           {/* AI Simulation */}
           {mode === 'ai' && (
-            <AIGDPractice story={userStory} onStoryChange={setUserStory} />
+            <ErrorBoundary>
+              <AIGDSimulator />
+            </ErrorBoundary>
           )}
 
           {/* Instructions */}
