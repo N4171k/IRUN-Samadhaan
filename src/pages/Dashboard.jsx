@@ -42,14 +42,20 @@ function Dashboard() {
       // Add days of current month
       const today = new Date();
       for (let day = 1; day <= daysInMonth; day++) {
+        const currentDay = new Date(year, month, day);
         const isToday = today.getFullYear() === year && 
                        today.getMonth() === month && 
                        today.getDate() === day;
+        
+        // Only allow activity on past dates and today, never on future dates
+        const isFutureDate = currentDay > today;
+        const hasActivity = !isFutureDate && Math.random() > 0.7; // Random activity only for past/current dates
+        
         days.push({ 
           day, 
           isCurrentMonth: true, 
           isToday,
-          hasActivity: Math.random() > 0.7 // Random activity for demo
+          hasActivity
         });
       }
       
