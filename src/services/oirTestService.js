@@ -1,6 +1,6 @@
 class OIRTestService {
   constructor() {
-    this.apiBaseUrl = 'http://localhost:3001/api/oir';
+    this.apiBaseUrl = 'https://irun-back.onrender.com/api/oir';
   }
 
   // Generate a new test

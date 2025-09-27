@@ -329,7 +329,7 @@ const AIGDSimulator = () => {
         };
         console.log('📤 Request body:', JSON.stringify(requestBody, null, 2));
         
-        const response = await fetch('http://localhost:3001/api/gemini/generate', {
+        const response = await fetch('https://irun-back.onrender.com/api/gemini/generate', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

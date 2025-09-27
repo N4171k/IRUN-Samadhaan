@@ -82,7 +82,7 @@ function WordAssociationTest() {
 
   const fetchWords = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/wat/words');
+      const response = await fetch('https://irun-back.onrender.com/api/wat/words');
       if (!response.ok) throw new Error('Failed to fetch words');
       const data = await response.json();
       setWords(data.words);
@@ -175,7 +175,7 @@ function WordAssociationTest() {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch('http://localhost:3001/api/wat/submit', {
+      const response = await fetch('https://irun-back.onrender.com/api/wat/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

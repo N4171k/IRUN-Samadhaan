@@ -20,7 +20,7 @@ function ThematicApperceptionTest() {
   const [topicError, setTopicError] = useState(null);
 
   // API base URL - memoized for performance
-  const API_BASE_URL = useMemo(() => 'http://localhost:3001/api/tat', []);
+  const API_BASE_URL = useMemo(() => 'https://irun-back.onrender.com/api/tat', []);
 
   const createTatImageFromTopic = useCallback((topicText) => {
     const safeTopic = (topicText || 'an ambiguous social situation')

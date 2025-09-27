@@ -11,7 +11,7 @@ class NELESocketService {
     connect() {
         if (this.socket) return;
 
-        this.socket = io('http://localhost:5000');
+        this.socket = io('https://irun-back.onrender.com');
 
         this.socket.on('connect', () => {
             console.log('Connected to NELE server');
