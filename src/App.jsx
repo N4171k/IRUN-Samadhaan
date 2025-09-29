@@ -24,9 +24,74 @@ import SDT from './components/SDT';
 import GTO from './components/GTO';
 import PI from './components/PI';
 import ConferenceTips from './components/ConferenceTips';
+import { APPWRITE_CONFIG_READY, APPWRITE_CONFIG_ERROR, APPWRITE_MISSING_KEYS } from './lib/appwrite';
 
 
 function App() {
+  if (!APPWRITE_CONFIG_READY) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)',
+          color: '#f8fafc',
+          padding: '2rem'
+        }}
+      >
+        <div
+          style={{
+            maxWidth: '540px',
+            width: '100%',
+            backgroundColor: 'rgba(15, 23, 42, 0.75)',
+            border: '1px solid rgba(148, 163, 184, 0.2)',
+            borderRadius: '24px',
+            padding: '2.5rem',
+            boxShadow: '0 40px 80px rgba(15, 23, 42, 0.45)',
+            backdropFilter: 'blur(12px)'
+          }}
+        >
+          <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1rem' }}>Configuration needed</h1>
+          <p style={{ lineHeight: 1.6, color: '#cbd5f5', marginBottom: '1.25rem' }}>
+            {APPWRITE_CONFIG_ERROR || 'The deployment is missing required Appwrite credentials.'}
+          </p>
+          {APPWRITE_MISSING_KEYS.length > 0 && (
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '0.5rem',
+                marginBottom: '1.5rem'
+              }}
+            >
+              {APPWRITE_MISSING_KEYS.map((key) => (
+                <span
+                  key={key}
+                  style={{
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: '9999px',
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    border: '1px solid rgba(96, 165, 250, 0.45)',
+                    color: '#bfdbfe',
+                    fontSize: '0.85rem'
+                  }}
+                >
+                  {key}
+                </span>
+              ))}
+            </div>
+          )}
+          <p style={{ fontSize: '0.95rem', color: '#94a3b8' }}>
+            Add these variables in your Vercel Project Settings &rarr; Environment Variables and redeploy. If
+            you already set them, trigger a fresh deploy so the updated values are embedded in the client bundle.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <NELEProvider>
       <BrowserRouter>

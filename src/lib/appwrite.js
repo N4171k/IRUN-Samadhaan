@@ -1,25 +1,50 @@
 import { Client, Account, Databases, Storage, ID, Query } from 'appwrite';
 
-// Validate environment variables
+const missingConfig = [];
+
 if (!import.meta.env.VITE_APPWRITE_ENDPOINT) {
-    console.error('VITE_APPWRITE_ENDPOINT is not defined. Please check your .env file.');
-    throw new Error('Missing Appwrite endpoint configuration');
+    missingConfig.push('VITE_APPWRITE_ENDPOINT');
 }
 
 if (!import.meta.env.VITE_APPWRITE_PROJECT_ID) {
-    console.error('VITE_APPWRITE_PROJECT_ID is not defined. Please check your .env file.');
-    throw new Error('Missing Appwrite project ID configuration');
+    missingConfig.push('VITE_APPWRITE_PROJECT_ID');
 }
 
-const client = new Client();
-client
-    .setEndpoint(import.meta.env.VITE_APPWRITE_ENDPOINT)
-    .setProject(import.meta.env.VITE_APPWRITE_PROJECT_ID);
+const hasValidConfig = missingConfig.length === 0;
+const configErrorMessage = hasValidConfig
+    ? null
+    : `Appwrite configuration missing. Please set: ${missingConfig.join(', ')}`;
 
-export const account = new Account(client);
-export const databases = new Databases(client);
-export const storage = new Storage(client);
+if (!hasValidConfig) {
+    console.error(configErrorMessage);
+}
+
+const client = hasValidConfig
+    ? new Client()
+        .setEndpoint(import.meta.env.VITE_APPWRITE_ENDPOINT)
+        .setProject(import.meta.env.VITE_APPWRITE_PROJECT_ID)
+    : null;
+
+const createUnavailableService = (serviceName) => new Proxy({}, {
+    get: (_, prop) => {
+        if (prop === '__isProxy') return true;
+
+        return (...args) => {
+            const message = `${serviceName}.${String(prop)} is unavailable: ${configErrorMessage}`;
+            console.error(message, { args });
+            return Promise.reject(new Error(message));
+        };
+    }
+});
+
+export const account = hasValidConfig ? new Account(client) : createUnavailableService('account');
+export const databases = hasValidConfig ? new Databases(client) : createUnavailableService('databases');
+export const storage = hasValidConfig ? new Storage(client) : createUnavailableService('storage');
 export { ID, Query }; // Export ID and Query for creating unique user IDs and queries
+
+export const APPWRITE_CONFIG_READY = hasValidConfig;
+export const APPWRITE_CONFIG_ERROR = configErrorMessage;
+export const APPWRITE_MISSING_KEYS = missingConfig;
 
 // Database and Collection IDs
 export const DATABASE_ID = 'community_db';
