@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import './pdfExportCompat.css';
 import { 
   CheckCircle, 
   XCircle, 
@@ -155,38 +156,44 @@ const DetailedOIRReport = ({ results, testData, userDetails, questions, answers,
       const html2canvas = html2CanvasModule.default ?? html2CanvasModule;
       const reportElement = reportRef.current;
 
-      // Wait a tick to ensure fonts/images are settled
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      reportElement.classList.add('pdf-export-compat');
 
-      const canvas = await html2canvas(reportElement, {
-        scale: window.devicePixelRatio > 1 ? 2 : 1.5,
-        useCORS: true,
-        allowTaint: false,
-        scrollX: 0,
-        scrollY: 0,
-        backgroundColor: '#ffffff'
-      });
+      try {
+        // Wait a tick to ensure fonts/images are settled and fallback styles apply
+        await new Promise((resolve) => setTimeout(resolve, 50));
 
-      const imgData = canvas.toDataURL('image/png', 1.0);
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const canvas = await html2canvas(reportElement, {
+          scale: window.devicePixelRatio > 1 ? 2 : 1.5,
+          useCORS: true,
+          allowTaint: false,
+          scrollX: 0,
+          scrollY: 0,
+          backgroundColor: '#ffffff'
+        });
 
-      const pageWidth = pdf.internal.pageSize.getWidth() - 20; // subtract horizontal margin
-      const pageHeight = pdf.internal.pageSize.getHeight() - 20; // subtract vertical margin
-      const imgHeight = (canvas.height * pageWidth) / canvas.width;
-      const totalPages = Math.max(1, Math.ceil(imgHeight / pageHeight));
+        const imgData = canvas.toDataURL('image/png', 1.0);
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-      for (let pageIndex = 0; pageIndex < totalPages; pageIndex += 1) {
-        if (pageIndex > 0) {
-          pdf.addPage();
+        const pageWidth = pdf.internal.pageSize.getWidth() - 20; // subtract horizontal margin
+        const pageHeight = pdf.internal.pageSize.getHeight() - 20; // subtract vertical margin
+        const imgHeight = (canvas.height * pageWidth) / canvas.width;
+        const totalPages = Math.max(1, Math.ceil(imgHeight / pageHeight));
+
+        for (let pageIndex = 0; pageIndex < totalPages; pageIndex += 1) {
+          if (pageIndex > 0) {
+            pdf.addPage();
+          }
+
+          const offsetY = -pageHeight * pageIndex;
+          pdf.addImage(imgData, 'PNG', 10, 10 + offsetY, pageWidth, imgHeight);
         }
 
-        const offsetY = -pageHeight * pageIndex;
-        pdf.addImage(imgData, 'PNG', 10, 10 + offsetY, pageWidth, imgHeight);
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-');
+        const filename = `OIR_Test_Report_${userDetails?.name || 'Candidate'}_${timestamp}.pdf`;
+        pdf.save(filename);
+      } finally {
+        reportElement.classList.remove('pdf-export-compat');
       }
-
-      const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-');
-      const filename = `OIR_Test_Report_${userDetails?.name || 'Candidate'}_${timestamp}.pdf`;
-      pdf.save(filename);
     } catch (error) {
       console.error('Error generating PDF:', error);
       setPdfError('Failed to generate PDF. Please try again after reloading the page.');
