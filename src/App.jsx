@@ -25,10 +25,33 @@ import GTO from './components/GTO';
 import PI from './components/PI';
 import ConferenceTips from './components/ConferenceTips';
 import { APPWRITE_CONFIG_READY, APPWRITE_CONFIG_ERROR, APPWRITE_MISSING_KEYS } from './lib/appwrite';
+import { API_CONFIG_USING_FALLBACK, API_BASE_URL } from './config/env';
+
 
 
 function App() {
+  const isBrowser = typeof window !== 'undefined';
+  const isProductionHost = isBrowser && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+
+  const issues = [];
+
   if (!APPWRITE_CONFIG_READY) {
+    issues.push({
+      title: 'Appwrite configuration needed',
+      message: APPWRITE_CONFIG_ERROR || 'The deployment is missing required Appwrite credentials.',
+      keys: APPWRITE_MISSING_KEYS
+    });
+  }
+
+  if (API_CONFIG_USING_FALLBACK && isProductionHost) {
+    issues.push({
+      title: 'Backend API URL required',
+      message: `Set VITE_API_BASE_URL (and optionally VITE_SOCKET_URL) to your deployed backend before building. The app is currently pointing to ${API_BASE_URL}, which is only meant for local development.`,
+      keys: ['VITE_API_BASE_URL', 'VITE_SOCKET_URL']
+    });
+  }
+
+  if (issues.length > 0) {
     return (
       <div
         style={{
@@ -43,7 +66,7 @@ function App() {
       >
         <div
           style={{
-            maxWidth: '540px',
+            maxWidth: '620px',
             width: '100%',
             backgroundColor: 'rgba(15, 23, 42, 0.75)',
             border: '1px solid rgba(148, 163, 184, 0.2)',
@@ -53,39 +76,43 @@ function App() {
             backdropFilter: 'blur(12px)'
           }}
         >
-          <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1rem' }}>Configuration needed</h1>
-          <p style={{ lineHeight: 1.6, color: '#cbd5f5', marginBottom: '1.25rem' }}>
-            {APPWRITE_CONFIG_ERROR || 'The deployment is missing required Appwrite credentials.'}
-          </p>
-          {APPWRITE_MISSING_KEYS.length > 0 && (
-            <div
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '0.5rem',
-                marginBottom: '1.5rem'
-              }}
-            >
-              {APPWRITE_MISSING_KEYS.map((key) => (
-                <span
-                  key={key}
-                  style={{
-                    padding: '0.35rem 0.75rem',
-                    borderRadius: '9999px',
-                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                    border: '1px solid rgba(96, 165, 250, 0.45)',
-                    color: '#bfdbfe',
-                    fontSize: '0.85rem'
-                  }}
-                >
-                  {key}
-                </span>
-              ))}
-            </div>
-          )}
-          <p style={{ fontSize: '0.95rem', color: '#94a3b8' }}>
-            Add these variables in your Vercel Project Settings &rarr; Environment Variables and redeploy. If
-            you already set them, trigger a fresh deploy so the updated values are embedded in the client bundle.
+          <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1.5rem' }}>Configuration needed</h1>
+          <div style={{ display: 'grid', gap: '1.5rem' }}>
+            {issues.map(({ title, message, keys }) => (
+              <div key={title} style={{ backgroundColor: 'rgba(15, 23, 42, 0.55)', borderRadius: '18px', padding: '1.5rem', border: '1px solid rgba(59, 130, 246, 0.25)' }}>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.75rem' }}>{title}</h2>
+                <p style={{ lineHeight: 1.6, color: '#cbd5f5', marginBottom: keys?.length ? '1.25rem' : 0 }}>{message}</p>
+                {keys?.length > 0 && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '0.5rem'
+                    }}
+                  >
+                    {keys.map((key) => (
+                      <span
+                        key={key}
+                        style={{
+                          padding: '0.35rem 0.75rem',
+                          borderRadius: '9999px',
+                          backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                          border: '1px solid rgba(96, 165, 250, 0.45)',
+                          color: '#bfdbfe',
+                          fontSize: '0.85rem'
+                        }}
+                      >
+                        {key}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <p style={{ fontSize: '0.95rem', color: '#94a3b8', marginTop: '2rem' }}>
+            Update these values in your hosting provider&apos;s Environment Variables, then trigger a fresh build so the
+            updated values are embedded in the client bundle.
           </p>
         </div>
       </div>
