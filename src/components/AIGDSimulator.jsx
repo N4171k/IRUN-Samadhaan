@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Bot, User, MessageCircle, Clock, CheckCircle, AlertCircle, Settings, Mic, MicOff } from 'lucide-react';
+import { buildApiUrl } from '../config/env';
+
+const GEMINI_PROXY_URL = buildApiUrl('api/gemini/generate');
 
 const AIGDSimulator = () => {
   // Validate API key format (basic validation for Gemini keys)
@@ -329,7 +332,7 @@ const AIGDSimulator = () => {
         };
         console.log('📤 Request body:', JSON.stringify(requestBody, null, 2));
         
-        const response = await fetch('https://irun-back.onrender.com/api/gemini/generate', {
+  const response = await fetch(GEMINI_PROXY_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

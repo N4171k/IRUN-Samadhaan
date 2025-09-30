@@ -1,4 +1,6 @@
-const NELE_API_BASE_URL = 'https://irun-back.onrender.com/api';
+import { buildApiUrl } from '../config/env';
+
+const NELE_API_BASE_URL = buildApiUrl('api');
 
 class NELEService {
     async startMonitoring() {

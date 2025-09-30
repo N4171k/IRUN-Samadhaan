@@ -16,11 +16,10 @@ import {
   TrendingDown,
   AlertTriangle
 } from 'lucide-react';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 
 const DetailedOIRReport = ({ results, testData, userDetails, questions, answers, onRetakeTest, onBackToDrills }) => {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [pdfError, setPdfError] = useState(null);
   const reportRef = useRef(null);
 
   // Safety checks for results
@@ -138,57 +137,59 @@ const DetailedOIRReport = ({ results, testData, userDetails, questions, answers,
   };
 
   const generatePDF = async () => {
-    if (!reportRef.current) return;
-    
+    if (isGeneratingPDF) return;
+    if (!reportRef.current) {
+      setPdfError('Report contents are not ready yet.');
+      return;
+    }
+
+    setPdfError(null);
     setIsGeneratingPDF(true);
-    
+
     try {
-      // Create a new jsPDF instance
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      
-      // Get the report element
+      const [{ jsPDF }, html2CanvasModule] = await Promise.all([
+        import('jspdf'),
+        import('html2canvas')
+      ]);
+
+      const html2canvas = html2CanvasModule.default ?? html2CanvasModule;
       const reportElement = reportRef.current;
-      
-      // Generate canvas from HTML
+
+      // Wait a tick to ensure fonts/images are settled
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
       const canvas = await html2canvas(reportElement, {
-        scale: 2,
+        scale: window.devicePixelRatio > 1 ? 2 : 1.5,
         useCORS: true,
-        allowTaint: true,
+        allowTaint: false,
+        scrollX: 0,
+        scrollY: 0,
         backgroundColor: '#ffffff'
       });
-      
-      const imgData = canvas.toDataURL('image/png');
-      
-      // Calculate dimensions to fit A4
-      const imgWidth = 190;
-      const pageHeight = 295;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      
-      let position = 10;
-      
-      // Add first page
-      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-      
-      // Add additional pages if needed
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight + 10;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+      const pageWidth = pdf.internal.pageSize.getWidth() - 20; // subtract horizontal margin
+      const pageHeight = pdf.internal.pageSize.getHeight() - 20; // subtract vertical margin
+      const imgHeight = (canvas.height * pageWidth) / canvas.width;
+      const totalPages = Math.max(1, Math.ceil(imgHeight / pageHeight));
+
+      for (let pageIndex = 0; pageIndex < totalPages; pageIndex += 1) {
+        if (pageIndex > 0) {
+          pdf.addPage();
+        }
+
+        const offsetY = -pageHeight * pageIndex;
+        pdf.addImage(imgData, 'PNG', 10, 10 + offsetY, pageWidth, imgHeight);
       }
-      
-      // Generate filename with timestamp
+
       const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-');
-      const filename = `OIR_Test_Report_${userDetails?.name || 'User'}_${timestamp}.pdf`;
-      
-      // Save the PDF
+      const filename = `OIR_Test_Report_${userDetails?.name || 'Candidate'}_${timestamp}.pdf`;
       pdf.save(filename);
-      
     } catch (error) {
       console.error('Error generating PDF:', error);
-      alert('Failed to generate PDF. Please try again.');
+      setPdfError('Failed to generate PDF. Please try again after reloading the page.');
     } finally {
       setIsGeneratingPDF(false);
     }
@@ -207,6 +208,11 @@ const DetailedOIRReport = ({ results, testData, userDetails, questions, answers,
           <span>{isGeneratingPDF ? 'Generating PDF...' : 'Export as PDF'}</span>
         </button>
       </div>
+      {pdfError && (
+        <p className="text-sm text-red-600 text-right -mt-3">
+          {pdfError}
+        </p>
+      )}
 
       {/* PDF Report Content */}
       <div ref={reportRef} className="bg-white p-8 space-y-8">

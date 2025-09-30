@@ -1,3 +1,4 @@
+import { API_BASE_URL as BACKEND_API_BASE_URL } from '../config/env';
 // Newsletter Service for sending daily current affairs to CDS aspirants
 
 // API Configuration
@@ -373,7 +374,7 @@ function scheduleNewsletters(users) {
   });
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+const API_BASE_URL = BACKEND_API_BASE_URL;
 
 /**
  * Send welcome newsletter to a new user

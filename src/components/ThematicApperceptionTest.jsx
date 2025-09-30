@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { account } from '../lib/appwrite';
+import { buildApiUrl } from '../config/env';
 import Navbar from './Navbar';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 
 const POLLINATIONS_BASE = 'https://image.pollinations.ai/prompt/';
 const TAT_FALLBACK_IMAGE = '/tat/fallback-bw.svg';
+const TAT_API_BASE_URL = buildApiUrl('api/tat');
 
 function ThematicApperceptionTest() {
   const navigate = useNavigate();
@@ -18,9 +20,6 @@ function ThematicApperceptionTest() {
   const [isLoadingTopic, setIsLoadingTopic] = useState(true);
   const [isLoadingFeedback, setIsLoadingFeedback] = useState(false);
   const [topicError, setTopicError] = useState(null);
-
-  // API base URL - memoized for performance
-  const API_BASE_URL = useMemo(() => 'https://irun-back.onrender.com/api/tat', []);
 
   const createTatImageFromTopic = useCallback((topicText) => {
     const safeTopic = (topicText || 'an ambiguous social situation')
@@ -63,7 +62,7 @@ function ThematicApperceptionTest() {
     setTopicError(null);
     
     try {
-      const response = await fetch(`${API_BASE_URL}/topic-with-image`);
+  const response = await fetch(`${TAT_API_BASE_URL}/topic-with-image`);
       const result = await response.json();
       
       if (result.success && result.data?.topic) {
@@ -99,7 +98,7 @@ function ThematicApperceptionTest() {
     setIsLoadingFeedback(true);
     
     try {
-      const response = await fetch(`${API_BASE_URL}/feedback`, {
+  const response = await fetch(`${TAT_API_BASE_URL}/feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

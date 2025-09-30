@@ -1,8 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { account } from '../lib/appwrite';
+import { buildApiUrl } from '../config/env';
 import Navbar from './Navbar';
 import { Play, Pause, RotateCcw, Clock, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
+
+const WAT_API_BASE_URL = buildApiUrl('api/wat');
 
 function WordAssociationTest() {
   const navigate = useNavigate();
@@ -82,7 +85,7 @@ function WordAssociationTest() {
 
   const fetchWords = async () => {
     try {
-      const response = await fetch('https://irun-back.onrender.com/api/wat/words');
+  const response = await fetch(`${WAT_API_BASE_URL}/words`);
       if (!response.ok) throw new Error('Failed to fetch words');
       const data = await response.json();
       setWords(data.words);
@@ -175,7 +178,7 @@ function WordAssociationTest() {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch('https://irun-back.onrender.com/api/wat/submit', {
+  const response = await fetch(`${WAT_API_BASE_URL}/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

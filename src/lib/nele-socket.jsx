@@ -1,4 +1,5 @@
 import { io } from 'socket.io-client';
+import { SOCKET_BASE_URL } from '../config/env';
 import { toast } from './toast-service';
 import React from 'react';
 
@@ -11,7 +12,7 @@ class NELESocketService {
     connect() {
         if (this.socket) return;
 
-        this.socket = io('https://irun-back.onrender.com');
+    this.socket = io(SOCKET_BASE_URL);
 
         this.socket.on('connect', () => {
             console.log('Connected to NELE server');

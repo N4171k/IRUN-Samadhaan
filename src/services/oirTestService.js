@@ -1,6 +1,8 @@
+import { buildApiUrl } from '../config/env';
+
 class OIRTestService {
   constructor() {
-    this.apiBaseUrl = 'https://irun-back.onrender.com/api/oir';
+    this.apiBaseUrl = buildApiUrl('api/oir');
   }
 
   // Generate a new test

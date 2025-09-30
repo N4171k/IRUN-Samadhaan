@@ -31,7 +31,7 @@ cp .env.example .env
    - Create a new API key
    - Add it to your `.env` file
 
-3. Update `.env` with your configuration:
+3. Update `.env` with your configuration (any of the following variable names are accepted: `GOOGLE_API_KEY`, `GOOGLE_API_KEY_1`, `GEMINI_API_KEY_1`, `VITE_GEMINI_API_KEY_1`, etc.):
 ```env
 PORT=3001
 NODE_ENV=development

@@ -8,20 +8,43 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const fetch = require('node-fetch');
 
-// Find all API keys in the environment
-console.log('ENV VARIABLES:', Object.keys(process.env).filter(key => key.startsWith('GOOGLE_API_KEY_')));
+// Discover available Gemini API keys from multiple naming conventions
+const GEMINI_KEY_PATTERNS = [
+  /^GOOGLE_API_KEY(?:_\d+)?$/,
+  /^GEMINI_API_KEY(?:_\d+)?$/,
+  /^VITE_GEMINI_API_KEY(?:_\d+)?$/
+];
 
-const apiKeys = Object.keys(process.env)
-  .filter(key => key.startsWith('GOOGLE_API_KEY_'))
-  .map(key => process.env[key]);
+const isPlaceholderKey = (value = '') => {
+  const normalized = value.trim().toLowerCase();
+  return (
+    normalized.length === 0 ||
+    normalized.includes('your_') ||
+    normalized.includes('replace') ||
+    normalized.includes('dummy')
+  );
+};
 
-console.log(`Found ${apiKeys.length} Google API keys`);
-if (apiKeys.length > 0) {
-  console.log('First key starts with:', apiKeys[0].substring(0, 10) + '...');
-}
+const discoveredKeyEntries = Object.entries(process.env)
+  .filter(([key, value]) => {
+    if (!value) return false;
+    return GEMINI_KEY_PATTERNS.some((pattern) => pattern.test(key));
+  });
+
+const apiKeys = Array.from(new Set(
+  discoveredKeyEntries
+    .map(([, value]) => value.trim())
+    .filter((value) => !isPlaceholderKey(value))
+));
+
+const discoveredLabels = discoveredKeyEntries.map(([key]) => key);
+console.log('Gemini API key env vars detected:', discoveredLabels);
+console.log(`Usable Gemini API keys: ${apiKeys.length}`);
 
 if (apiKeys.length === 0) {
-  console.warn('No Google API Keys found. Please add them to your .env file in the format GOOGLE_API_KEY_1, GOOGLE_API_KEY_2, etc.');
+  console.warn('No usable Google Gemini API keys found. Add GOOGLE_API_KEY_1 / GEMINI_API_KEY_1 / VITE_GEMINI_API_KEY_1 to the server environment.');
+} else {
+  console.log('First Gemini API key prefix:', apiKeys[0].substring(0, 10) + '...');
 }
 
 // Make API keys available globally
