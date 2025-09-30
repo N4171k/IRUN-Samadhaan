@@ -87,7 +87,7 @@ function OIR() {
       setTestResults(null);
     } catch (error) {
       console.error('Failed to generate test:', error);
-      alert('Failed to generate test. Please try again.');
+      alert(error?.message ? `Failed to generate test: ${error.message}` : 'Failed to generate test. Please try again.');
     } finally {
       setIsLoading(false);
     }

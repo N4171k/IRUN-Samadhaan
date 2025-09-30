@@ -5,22 +5,70 @@ class OIRTestService {
     this.apiBaseUrl = buildApiUrl('api/oir');
   }
 
+  buildEndpoint(path = '') {
+    if (!path) {
+      return this.apiBaseUrl;
+    }
+
+    return `${this.apiBaseUrl}${path.startsWith('/') ? path : `/${path}`}`;
+  }
+
+  async performRequest(path, options = {}) {
+    const url = this.buildEndpoint(path);
+    const response = await fetch(url, options);
+    const contentType = response.headers.get('content-type') || '';
+    const bodyText = await response.text();
+
+    let payload;
+
+    if (bodyText && contentType.includes('application/json')) {
+      try {
+        payload = JSON.parse(bodyText);
+      } catch (parseError) {
+        const error = new Error('Received malformed JSON from the server while generating the OIR test.');
+        error.cause = parseError;
+        error.status = response.status;
+        error.endpoint = url;
+        throw error;
+      }
+    }
+
+    if (!payload) {
+      const snippet = bodyText.slice(0, 200).replace(/\s+/g, ' ').trim();
+      const error = new Error(
+        `Unexpected response format from the OIR service at ${url}. ${
+          snippet ? `Body starts with: ${snippet}` : 'Response body was empty.'
+        }`
+      );
+      error.status = response.status;
+      error.endpoint = url;
+      error.responsePreview = snippet;
+      throw error;
+    }
+
+    if (!response.ok) {
+      const error = new Error(payload.message || payload.error || `Request failed with status ${response.status}`);
+      error.status = response.status;
+      error.endpoint = url;
+      error.body = payload;
+      throw error;
+    }
+
+    if (!payload.success || typeof payload.data === 'undefined') {
+      const error = new Error(payload.message || 'Invalid response format received from the OIR service.');
+      error.status = response.status;
+      error.endpoint = url;
+      error.body = payload;
+      throw error;
+    }
+
+    return payload.data;
+  }
+
   // Generate a new test
   async generateTest() {
     try {
-      const response = await fetch(`${this.apiBaseUrl}/generate-test`);
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to generate test');
-      }
-      
-      // Handle the backend response format {success: true, data: {...}}
-      if (result.success && result.data) {
-        return result.data;
-      } else {
-        throw new Error(result.message || 'Invalid response format');
-      }
+      return await this.performRequest('generate-test');
     } catch (error) {
       console.error('Error generating test:', error);
       throw error;
@@ -30,7 +78,7 @@ class OIRTestService {
   // Submit test answers
   async submitTest(testId, answers, timeTaken) {
     try {
-      const response = await fetch(`${this.apiBaseUrl}/submit-test`, {
+      return await this.performRequest('submit-test', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,19 +89,6 @@ class OIRTestService {
           time_taken: timeTaken
         }),
       });
-      
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to submit test');
-      }
-      
-      // Handle the backend response format {success: true, data: {...}}
-      if (result.success && result.data) {
-        return result.data;
-      } else {
-        throw new Error(result.message || 'Invalid response format');
-      }
     } catch (error) {
       console.error('Error submitting test:', error);
       throw error;
@@ -63,7 +98,7 @@ class OIRTestService {
   // Get detailed analytics
   async getAnalytics(testResult) {
     try {
-      const response = await fetch(`${this.apiBaseUrl}/get-analytics`, {
+      return await this.performRequest('get-analytics', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,19 +107,6 @@ class OIRTestService {
           test_result: testResult
         }),
       });
-      
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to get analytics');
-      }
-      
-      // Handle the backend response format {success: true, data: {...}}
-      if (result.success && result.data) {
-        return result.data;
-      } else {
-        throw new Error(result.message || 'Invalid response format');
-      }
     } catch (error) {
       console.error('Error getting analytics:', error);
       throw error;
@@ -94,19 +116,7 @@ class OIRTestService {
   // Get test information
   async getTestInfo() {
     try {
-      const response = await fetch(`${this.apiBaseUrl}/test-info`);
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to get test info');
-      }
-      
-      // Handle the backend response format {success: true, data: {...}}
-      if (result.success && result.data) {
-        return result.data;
-      } else {
-        throw new Error(result.message || 'Invalid response format');
-      }
+      return await this.performRequest('test-info');
     } catch (error) {
       console.error('Error getting test info:', error);
       throw error;
