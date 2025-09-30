@@ -26,15 +26,53 @@ const sanitizeBaseUrl = (value) => {
 
 const DEFAULT_API_BASE_URL = 'https://irun-back.onrender.com';
 
-const rawApiBase = sanitizeBaseUrl(import.meta.env.VITE_API_BASE_URL);
-const rawSocketBase = sanitizeBaseUrl(import.meta.env.VITE_SOCKET_URL);
+const getCurrentOrigin = () => {
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
 
-export const API_BASE_URL = rawApiBase || DEFAULT_API_BASE_URL;
+  try {
+    return new URL(window.location.origin).origin;
+  } catch (error) {
+    console.warn('[config] Unable to determine window.origin:', error);
+    return undefined;
+  }
+};
+
+const rawEnvApiBase = import.meta.env.VITE_API_BASE_URL;
+const rawEnvSocketBase = import.meta.env.VITE_SOCKET_URL;
+
+const rawApiBase = sanitizeBaseUrl(rawEnvApiBase);
+const rawSocketBase = sanitizeBaseUrl(rawEnvSocketBase);
+
+const origin = getCurrentOrigin();
+
+let apiBaseUrl = rawApiBase || DEFAULT_API_BASE_URL;
+let apiFallbackReason = null;
+
+if (!rawApiBase) {
+  if (rawEnvApiBase) {
+    apiFallbackReason = 'invalid-url';
+  } else {
+    apiFallbackReason = 'missing';
+  }
+} else if (origin && rawApiBase === origin && rawApiBase !== DEFAULT_API_BASE_URL) {
+  apiBaseUrl = DEFAULT_API_BASE_URL;
+  apiFallbackReason = 'same-as-frontend-origin';
+  console.warn('[config] VITE_API_BASE_URL matches the frontend origin. Falling back to the default backend URL:', DEFAULT_API_BASE_URL);
+}
+
+const socketFallbackReason = !rawSocketBase && rawEnvSocketBase ? 'invalid-url' : null;
+
+export const API_BASE_URL = apiBaseUrl;
 export const SOCKET_BASE_URL = rawSocketBase || API_BASE_URL;
 
-export const API_CONFIG_READY = Boolean(rawApiBase);
+export const API_CONFIG_READY = Boolean(rawApiBase) && apiFallbackReason === null;
 export const SOCKET_CONFIG_READY = Boolean(rawSocketBase || rawApiBase);
-export const API_CONFIG_USING_FALLBACK = !rawApiBase && DEFAULT_API_BASE_URL.includes('localhost');
+export const API_CONFIG_USING_FALLBACK = apiFallbackReason !== null;
+export const API_CONFIG_FALLBACK_REASON = apiFallbackReason;
+export const SOCKET_CONFIG_FALLBACK_REASON = rawSocketBase ? null : socketFallbackReason;
+export const API_DEFAULT_BASE_URL = DEFAULT_API_BASE_URL;
 
 export const buildApiUrl = (path = '') => {
   if (!path) return API_BASE_URL;

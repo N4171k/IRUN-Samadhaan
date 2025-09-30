@@ -25,7 +25,7 @@ import GTO from './components/GTO';
 import PI from './components/PI';
 import ConferenceTips from './components/ConferenceTips';
 import { APPWRITE_CONFIG_READY, APPWRITE_CONFIG_ERROR, APPWRITE_MISSING_KEYS } from './lib/appwrite';
-import { API_CONFIG_USING_FALLBACK, API_BASE_URL } from './config/env';
+import { API_CONFIG_USING_FALLBACK, API_BASE_URL, API_CONFIG_FALLBACK_REASON, API_DEFAULT_BASE_URL } from './config/env';
 
 
 
@@ -44,9 +44,20 @@ function App() {
   }
 
   if (API_CONFIG_USING_FALLBACK && isProductionHost) {
+    let apiMessage = `Set VITE_API_BASE_URL (and optionally VITE_SOCKET_URL) to your deployed backend before building. The app is currently pointing to ${API_BASE_URL}, which is only meant for development.`;
+
+    if (API_CONFIG_FALLBACK_REASON === 'missing') {
+      apiMessage = `VITE_API_BASE_URL isn't defined in your environment, so the app fell back to ${API_BASE_URL}. Update the variable to point at your backend (for example ${API_DEFAULT_BASE_URL}) and rebuild.`;
+    } else if (API_CONFIG_FALLBACK_REASON === 'invalid-url') {
+      apiMessage = `VITE_API_BASE_URL is set but the value isn't a valid URL. The app defaulted to ${API_BASE_URL}. Replace it with your backend URL (e.g., ${API_DEFAULT_BASE_URL}) and rebuild.`;
+    } else if (API_CONFIG_FALLBACK_REASON === 'same-as-frontend-origin') {
+      const origin = isBrowser ? window.location.origin : 'this site';
+      apiMessage = `VITE_API_BASE_URL currently points to ${origin}, which serves the front-end HTML instead of JSON. The app automatically switched to ${API_BASE_URL}, but you must configure the environment variable to your backend (for example ${API_DEFAULT_BASE_URL}) and rebuild.`;
+    }
+
     issues.push({
       title: 'Backend API URL required',
-      message: `Set VITE_API_BASE_URL (and optionally VITE_SOCKET_URL) to your deployed backend before building. The app is currently pointing to ${API_BASE_URL}, which is only meant for local development.`,
+      message: apiMessage,
       keys: ['VITE_API_BASE_URL', 'VITE_SOCKET_URL']
     });
   }
