@@ -24,7 +24,7 @@ const sanitizeBaseUrl = (value) => {
   }
 };
 
-const DEFAULT_API_BASE_URL = 'http://localhost:3001';
+const DEFAULT_API_BASE_URL = 'https://irun-back.onrender.com';
 
 const rawApiBase = sanitizeBaseUrl(import.meta.env.VITE_API_BASE_URL);
 const rawSocketBase = sanitizeBaseUrl(import.meta.env.VITE_SOCKET_URL);
@@ -34,7 +34,7 @@ export const SOCKET_BASE_URL = rawSocketBase || API_BASE_URL;
 
 export const API_CONFIG_READY = Boolean(rawApiBase);
 export const SOCKET_CONFIG_READY = Boolean(rawSocketBase || rawApiBase);
-export const API_CONFIG_USING_FALLBACK = !rawApiBase;
+export const API_CONFIG_USING_FALLBACK = !rawApiBase && DEFAULT_API_BASE_URL.includes('localhost');
 
 export const buildApiUrl = (path = '') => {
   if (!path) return API_BASE_URL;
