@@ -49,7 +49,7 @@ const Loader = () => {
 
         <g
           id="logo-text"
-          fill="#4a4a4a"
+          fill="#ffffffff"
           fontFamily="'Inter', Arial, sans-serif"
           fontSize="48"
           fontWeight="bold"
@@ -64,7 +64,7 @@ const Loader = () => {
           <path
             id="run-line"
             d="M85,73 C130,73 140,80 180,80 C210,80 220,73 255,73"
-            stroke="#4a4a4a"
+            stroke="#ffffffff"
             strokeWidth="4"
             fill="none"
             strokeLinecap="round"

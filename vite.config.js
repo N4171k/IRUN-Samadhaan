@@ -32,6 +32,11 @@ export default defineConfig({
       'clsx',
       'tailwind-merge',
       'lucide-react'
+    ],
+    exclude: [
+      'pdfjs-dist',
+      'pdfjs-dist/build/pdf.worker.js',
+      'pdfjs-dist/build/pdf.worker.mjs'
     ]
   },
   server: {
