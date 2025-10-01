@@ -4,6 +4,7 @@ import { account } from '../lib/appwrite';
 import { buildApiUrl } from '../config/env';
 import Navbar from './Navbar';
 import { Play, Pause, RotateCcw, Clock, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
+import { useLoaderTask } from '../contexts/LoaderContext';
 
 const WAT_API_BASE_URL = buildApiUrl('api/wat');
 
@@ -11,6 +12,7 @@ function WordAssociationTest() {
   const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const runWithLoader = useLoaderTask();
   
   // Test state
   const [isTestActive, setIsTestActive] = useState(false);
@@ -34,16 +36,18 @@ function WordAssociationTest() {
   useEffect(() => {
     async function fetchUser() {
       try {
-        const user = await account.get();
-        setUserDetails(user);
-        setIsLoading(false);
+        await runWithLoader(async () => {
+          const user = await account.get();
+          setUserDetails(user);
+          setIsLoading(false);
+        });
       } catch (err) {
         console.error('User not logged in:', err);
         navigate('/login');
       }
     }
     fetchUser();
-  }, [navigate]);
+  }, [navigate, runWithLoader]);
 
   useEffect(() => {
     if (isTestActive) {
@@ -83,12 +87,14 @@ function WordAssociationTest() {
     navigate('/login');
   };
 
-  const fetchWords = async () => {
+  const fetchWords = useCallback(async () => {
     try {
-  const response = await fetch(`${WAT_API_BASE_URL}/words`);
-      if (!response.ok) throw new Error('Failed to fetch words');
-      const data = await response.json();
-      setWords(data.words);
+      await runWithLoader(async () => {
+        const response = await fetch(`${WAT_API_BASE_URL}/words`);
+        if (!response.ok) throw new Error('Failed to fetch words');
+        const data = await response.json();
+        setWords(data.words);
+      });
     } catch (error) {
       console.error('Error fetching words:', error);
       // Fallback words if API fails
@@ -104,7 +110,7 @@ function WordAssociationTest() {
         'Standard', 'Efficiency', 'Teamwork', 'Communication', 'Strategy', 'Tactics'
       ]);
     }
-  };
+  }, [runWithLoader]);
 
   const startTest = async () => {
     await fetchWords();
@@ -178,22 +184,24 @@ function WordAssociationTest() {
     setIsSubmitting(true);
     
     try {
-  const response = await fetch(`${WAT_API_BASE_URL}/submit`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: userDetails.$id,
-          responses: finalResponses,
-          totalTimeUsed: totalTime - totalTimeRemaining
-        }),
+      await runWithLoader(async () => {
+        const response = await fetch(`${WAT_API_BASE_URL}/submit`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: userDetails.$id,
+            responses: finalResponses,
+            totalTimeUsed: totalTime - totalTimeRemaining
+          }),
+        });
+
+        if (!response.ok) throw new Error('Failed to submit test');
+
+        const results = await response.json();
+        setTestResults(results);
       });
-      
-      if (!response.ok) throw new Error('Failed to submit test');
-      
-      const results = await response.json();
-      setTestResults(results);
     } catch (error) {
       console.error('Error submitting test:', error);
       // Show basic results even if submission fails

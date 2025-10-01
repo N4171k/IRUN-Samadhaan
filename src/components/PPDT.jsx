@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { account } from '../lib/appwrite';
 import Navbar from './Navbar';
 import { ArrowLeft, Clock, Eye, EyeOff, RotateCcw, Play } from 'lucide-react';
+import { useLoaderTask } from '../contexts/LoaderContext';
 
 function PPDT() {
   const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const runWithLoader = useLoaderTask();
   
   // Test state
   const [isTestActive, setIsTestActive] = useState(false);
@@ -117,16 +119,18 @@ function PPDT() {
   useEffect(() => {
     async function fetchUser() {
       try {
-        const user = await account.get();
-        setUserDetails(user);
-        setIsLoading(false);
+        await runWithLoader(async () => {
+          const user = await account.get();
+          setUserDetails(user);
+          setIsLoading(false);
+        });
       } catch (err) {
         console.error('User not logged in:', err);
         navigate('/login');
       }
     }
     fetchUser();
-  }, [navigate]);
+  }, [navigate, runWithLoader]);
 
   useEffect(() => {
     if (isTestActive && timeRemaining > 0) {

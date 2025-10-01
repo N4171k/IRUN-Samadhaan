@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { account } from '../../lib/appwrite';
 import Navbar from '../../components/Navbar';
 import { ArrowLeft, Calendar, BookOpen, Brain, Clock, Target, CheckCircle2, Users, Headphones, FileText } from 'lucide-react';
+import { useLoaderTask } from '../../contexts/LoaderContext';
 
 function StudyPlanGenerator() {
   const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const runWithLoader = useLoaderTask();
   
   // Form state
   const [examDate, setExamDate] = useState('');
@@ -23,22 +25,30 @@ function StudyPlanGenerator() {
   const [studyPlan, setStudyPlan] = useState(null);
   const [showForm, setShowForm] = useState(true);
   
-  // Get API key from environment variables
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  // Get API key from environment variables (fallback to candidate keys if base key missing)
+  const apiKey = [
+    import.meta.env.VITE_GEMINI_API_KEY,
+    import.meta.env.VITE_GEMINI_API_KEY_1,
+    import.meta.env.VITE_GEMINI_API_KEY_2,
+    import.meta.env.VITE_GEMINI_API_KEY_3,
+    import.meta.env.VITE_GEMINI_API_KEY_4
+  ].find(Boolean);
 
   useEffect(() => {
     async function fetchUser() {
       try {
-        const user = await account.get();
-        setUserDetails(user);
-        setIsLoading(false);
+        await runWithLoader(async () => {
+          const user = await account.get();
+          setUserDetails(user);
+          setIsLoading(false);
+        });
       } catch (err) {
         console.error('User not logged in:', err);
         navigate('/login');
       }
     }
     fetchUser();
-  }, [navigate]);
+  }, [navigate, runWithLoader]);
 
   const handleLogout = async () => {
     try {
@@ -73,7 +83,7 @@ function StudyPlanGenerator() {
 
   const generateStudyPlan = async () => {
     if (!apiKey) {
-      alert('Gemini API key not configured. Please check your environment variables.');
+      alert('Gemini API key not configured. Please set VITE_GEMINI_API_KEY or VITE_GEMINI_API_KEY_1-4 in your .env file.');
       return;
     }
 
@@ -84,7 +94,7 @@ function StudyPlanGenerator() {
 
     setIsGenerating(true);
     console.log('Starting study plan generation...');
-    console.log('API Key available:', !!apiKey);
+  console.log('API Key available:', !!apiKey);
     console.log('Form data:', { examDate, examName, topics, learningType, currentLevel });
     
     try {
@@ -158,27 +168,29 @@ Respond with ONLY a valid JSON object (no other text) with this exact structure:
   }
 }`;
 
-      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
+      const data = await runWithLoader(async () => {
+        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: prompt
+              }]
             }]
-          }]
-        })
+          })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('API Error:', response.status, errorText);
+          throw new Error(`API request failed: ${response.status}`);
+        }
+
+        return response.json();
       });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error:', response.status, errorText);
-        throw new Error(`API request failed: ${response.status}`);
-      }
-
-      const data = await response.json();
       console.log('API Response:', data);
       
       if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
@@ -686,7 +698,7 @@ Respond with ONLY a valid JSON object (no other text) with this exact structure:
             
             {!apiKey && (
               <p className="text-center text-red-600 mt-2">
-                ⚠️ Gemini API key not configured. Please check your environment variables.
+                ⚠️ Gemini API key not configured. Please set VITE_GEMINI_API_KEY or VITE_GEMINI_API_KEY_1-4 in your .env file.
               </p>
             )}
           </div>

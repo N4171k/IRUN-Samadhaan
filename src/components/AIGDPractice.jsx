@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useLoaderTask } from '../contexts/LoaderContext';
 
 const FALLBACK_LANGUAGES = [
   { code: 'en-IN', label: 'English (India)' },
@@ -17,12 +18,13 @@ function AIGDPractice({ story, onStoryChange }) {
   const [serverStatus, setServerStatus] = useState('checking');
   const recognitionRef = useRef(null);
   const speechSupported = typeof window !== 'undefined' && !!window.speechSynthesis;
+  const runWithLoader = useLoaderTask();
 
   useEffect(() => {
     async function checkServerAndFetchLanguages() {
       try {
         setServerStatus('checking');
-        const response = await fetch('/api/gd/languages');
+        const response = await runWithLoader(async () => fetch('/api/gd/languages'));
         console.log('Languages API response status:', response.status);
         
         if (!response.ok) {
@@ -68,7 +70,7 @@ function AIGDPractice({ story, onStoryChange }) {
     }
 
     checkServerAndFetchLanguages();
-  }, []);
+  }, [runWithLoader]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -147,45 +149,47 @@ function AIGDPractice({ story, onStoryChange }) {
     setResult(null);
 
     try {
-      const response = await fetch('/api/gd/simulate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          story,
-          language
-        })
-      });
+      await runWithLoader(async () => {
+        const response = await fetch('/api/gd/simulate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            story,
+            language
+          })
+        });
 
-      console.log('Simulation API response status:', response.status);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Simulation API error ${response.status}:`, errorText);
-        throw new Error(`Server error (${response.status}): ${response.statusText}`);
-      }
-      
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
+        console.log('Simulation API response status:', response.status);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`Simulation API error ${response.status}:`, errorText);
+          throw new Error(`Server error (${response.status}): ${response.statusText}`);
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const responseText = await response.text();
+          console.error('Simulation API did not return JSON, content-type:', contentType, 'Response:', responseText);
+          throw new Error('Server returned invalid response format');
+        }
+
         const responseText = await response.text();
-        console.error('Simulation API did not return JSON, content-type:', contentType, 'Response:', responseText);
-        throw new Error('Server returned invalid response format');
-      }
-      
-      const responseText = await response.text();
-      console.log('Simulation API raw response:', responseText);
-      
-      if (!responseText.trim()) {
-        throw new Error('Server returned empty response');
-      }
-      
-      const payload = JSON.parse(responseText);
-      if (!payload?.success) {
-        throw new Error(payload?.message || 'Simulation failed. Please try again later.');
-      }
+        console.log('Simulation API raw response:', responseText);
 
-      setResult(payload.data);
+        if (!responseText.trim()) {
+          throw new Error('Server returned empty response');
+        }
+
+        const payload = JSON.parse(responseText);
+        if (!payload?.success) {
+          throw new Error(payload?.message || 'Simulation failed. Please try again later.');
+        }
+
+        setResult(payload.data);
+      });
     } catch (err) {
       console.error('GD simulation error:', err);
       if (err.name === 'SyntaxError' && err.message.includes('JSON')) {

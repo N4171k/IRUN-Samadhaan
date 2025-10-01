@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Bot, User, MessageCircle, Clock, CheckCircle, AlertCircle, Settings, Mic, MicOff } from 'lucide-react';
 import { buildApiUrl } from '../config/env';
+import { useLoaderTask } from '../contexts/LoaderContext';
 
 const GEMINI_PROXY_URL = buildApiUrl('api/gemini/generate');
 
 const AIGDSimulator = () => {
+  const runWithLoader = useLoaderTask();
   // Validate API key format (basic validation for Gemini keys)
   const isValidApiKey = (apiKey) => {
     return apiKey && apiKey.trim().length > 20 && apiKey.startsWith('AIzaSy');
@@ -213,73 +215,82 @@ const AIGDSimulator = () => {
   const generateAIResponse = async (candidateIndex, topic, history) => {
     setIsLoading(true);
     const candidate = Object.values(aiConfigs)[candidateIndex];
+    let updatedHistory;
     
     try {
-      // Build context for the AI
-      let context = `You are participating in a Group Discussion (GD) for SSB selection. 
-      Topic: "${topic}"
-      Your name: ${candidate.name}
-      Your personality: ${personalities[candidate.personality]}
-      
-      Rules:
-      - Keep responses between 30-80 words
-      - Be respectful and professional
-      - Present your viewpoint clearly
-      - ${candidateIndex === 0 ? 'Start the discussion with an opening statement' : 'Respond to previous points and add your perspective'}
-      - Avoid aggressive language
-      - Show leadership qualities
-      
-      Previous discussion:`;
+      await runWithLoader(async () => {
+        // Build context for the AI
+        let context = `You are participating in a Group Discussion (GD) for SSB selection. 
+        Topic: "${topic}"
+        Your name: ${candidate.name}
+        Your personality: ${personalities[candidate.personality]}
+        
+        Rules:
+        - Keep responses between 30-80 words
+        - Be respectful and professional
+        - Present your viewpoint clearly
+        - ${candidateIndex === 0 ? 'Start the discussion with an opening statement' : 'Respond to previous points and add your perspective'}
+        - Avoid aggressive language
+        - Show leadership qualities
+        
+        Previous discussion:`;
 
-      history.forEach((entry, index) => {
-        context += `\n${entry.speaker}: ${entry.message}`;
-      });
+        history.forEach((entry) => {
+          context += `\n${entry.speaker}: ${entry.message}`;
+        });
 
-      context += `\n\nNow give your response as ${candidate.name}:`;
+        context += `\n\nNow give your response as ${candidate.name}:`;
 
-      // Try with candidate's API key first, then fallback to other keys if rate limited
-      let response;
-      try {
-        response = await callGeminiAPI(candidate.apiKey, context);
-      } catch (error) {
-        if (error.message.includes('Rate limit exceeded')) {
-          // Try with other available API keys
-          const allKeys = [import.meta.env.VITE_GEMINI_API_KEY_1, import.meta.env.VITE_GEMINI_API_KEY_2, import.meta.env.VITE_GEMINI_API_KEY_3, import.meta.env.VITE_GEMINI_API_KEY_4].filter(key => key && key !== candidate.apiKey);
-          for (const fallbackKey of allKeys) {
-            try {
-              response = await callGeminiAPI(fallbackKey, context);
-              break;
-            } catch (fallbackError) {
-              if (!fallbackError.message.includes('Rate limit exceeded')) {
-                throw fallbackError;
+        // Try with candidate's API key first, then fallback to other keys if rate limited
+        let response;
+        try {
+          response = await callGeminiAPI(candidate.apiKey, context);
+        } catch (error) {
+          if (error.message.includes('Rate limit exceeded')) {
+            // Try with other available API keys
+            const allKeys = [
+              import.meta.env.VITE_GEMINI_API_KEY_1,
+              import.meta.env.VITE_GEMINI_API_KEY_2,
+              import.meta.env.VITE_GEMINI_API_KEY_3,
+              import.meta.env.VITE_GEMINI_API_KEY_4
+            ].filter(key => key && key !== candidate.apiKey);
+            for (const fallbackKey of allKeys) {
+              try {
+                response = await callGeminiAPI(fallbackKey, context);
+                break;
+              } catch (fallbackError) {
+                if (!fallbackError.message.includes('Rate limit exceeded')) {
+                  throw fallbackError;
+                }
               }
             }
+            if (!response) {
+              throw error; // All keys are rate limited
+            }
+          } else {
+            throw error;
           }
-          if (!response) {
-            throw error; // All keys are rate limited
-          }
-        } else {
-          throw error;
         }
-      }
-      
-      const newEntry = {
-        speaker: candidate.name,
-        message: response,
-        type: 'ai',
-        candidateIndex: candidateIndex,
-        timestamp: new Date().toISOString()
-      };
 
-      const updatedHistory = [...history, newEntry];
+        const newEntry = {
+          speaker: candidate.name,
+          message: response,
+          type: 'ai',
+          candidateIndex: candidateIndex,
+          timestamp: new Date().toISOString()
+        };
+
+        updatedHistory = [...history, newEntry];
+      });
+
       setGdHistory(updatedHistory);
 
       // Move to next speaker or user turn with longer delays to avoid rate limiting
-      if (candidateIndex < 3) {
+      if (candidateIndex < 3 && updatedHistory) {
         setCurrentSpeaker(candidateIndex + 1);
         // Increase delay to 10 seconds to avoid rate limiting and quota issues
         setTimeout(() => generateAIResponse(candidateIndex + 1, topic, updatedHistory), 10000);
-      } else {
+      } else if (updatedHistory) {
         // All AI candidates have spoken, now user's turn
         setIsUserTurn(true);
         setCurrentSpeaker(4);
@@ -332,13 +343,14 @@ const AIGDSimulator = () => {
         };
         console.log('📤 Request body:', JSON.stringify(requestBody, null, 2));
         
-  const response = await fetch(GEMINI_PROXY_URL, {
+        const response = await runWithLoader(async () => fetch(GEMINI_PROXY_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(requestBody)
-        });      console.log('📨 Response status:', response.status);
+        }));
+        console.log('📨 Response status:', response.status);
       console.log('📨 Response headers:', response.headers);
       
       if (!response.ok) {
@@ -436,13 +448,15 @@ const AIGDSimulator = () => {
   // Generate final assessment report
   const generateFinalReport = async (history) => {
     setIsLoading(true);
+    let report;
     
     try {
-      // Use first AI's API key for report generation
-      const firstApiKey = Object.values(aiConfigs)[0].apiKey;
-      
-      const userResponses = history.filter(entry => entry.type === 'user');
-      const reportPrompt = `Analyze this Group Discussion performance and provide a detailed assessment report.
+      await runWithLoader(async () => {
+        // Use first AI's API key for report generation
+        const firstApiKey = Object.values(aiConfigs)[0].apiKey;
+        
+        const userResponses = history.filter(entry => entry.type === 'user');
+        const reportPrompt = `Analyze this Group Discussion performance and provide a detailed assessment report.
 
 Topic: "${currentTopic}"
 
@@ -466,10 +480,11 @@ For each category, provide:
 - Specific suggestions
 
 Format the response as a structured report.`;
+    report = await callGeminiAPI(firstApiKey, reportPrompt);
+  });
 
-      const report = await callGeminiAPI(firstApiKey, reportPrompt);
-      setFinalReport(report);
-      setGdComplete(true);
+  setFinalReport(report);
+  setGdComplete(true);
       
     } catch (error) {
       console.error('Error generating report:', error);

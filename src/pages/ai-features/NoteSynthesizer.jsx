@@ -1,36 +1,43 @@
 import React, { useState } from 'react';
 import Navbar from '../../components/Navbar';
 import { useNavigate } from 'react-router-dom';
+import { useLoaderTask } from '../../contexts/LoaderContext';
 
 function NoteSynthesizer() {
   const navigate = useNavigate();
   const [notes, setNotes] = useState('');
   const [synthesizedNotes, setSynthesizedNotes] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const runWithLoader = useLoaderTask();
 
   const handleSynthesize = async () => {
     if (!notes.trim()) return;
     
     setIsLoading(true);
-    // Simulate AI processing
-    setTimeout(() => {
-      setSynthesizedNotes(
-        'Synthesized Notes Summary\n\n' +
-        'Key Points:\n' +
-        '• Main concepts extracted from your notes\n' +
-        '• Important details highlighted\n' +
-        '• Structured format for better understanding\n\n' +
-        'Quick Review:\n' +
-        '• Bullet points for easy scanning\n' +
-        '• Connections between topics identified\n' +
-        '• Action items highlighted\n\n' +
-        'Study Tips:\n' +
-        '• Focus areas identified\n' +
-        '• Memory techniques suggested\n' +
-        '• Review schedule recommended'
-      );
+    try {
+      await runWithLoader(async () => new Promise((resolve) => {
+        setTimeout(() => {
+          setSynthesizedNotes(
+            'Synthesized Notes Summary\n\n' +
+            'Key Points:\n' +
+            '• Main concepts extracted from your notes\n' +
+            '• Important details highlighted\n' +
+            '• Structured format for better understanding\n\n' +
+            'Quick Review:\n' +
+            '• Bullet points for easy scanning\n' +
+            '• Connections between topics identified\n' +
+            '• Action items highlighted\n\n' +
+            'Study Tips:\n' +
+            '• Focus areas identified\n' +
+            '• Memory techniques suggested\n' +
+            '• Review schedule recommended'
+          );
+          resolve();
+        }, 2000);
+      }));
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   const handleLogout = () => {

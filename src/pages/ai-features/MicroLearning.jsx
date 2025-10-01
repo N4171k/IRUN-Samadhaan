@@ -4,11 +4,13 @@ import { account } from '../../lib/appwrite';
 import Navbar from '../../components/Navbar';
 import { ArrowLeft, Upload, FileText, Sparkles, Download, RotateCcw, Trash2 } from 'lucide-react';
 import * as pdfjsLib from 'pdfjs-dist/webpack';
+import { useLoaderTask } from '../../contexts/LoaderContext';
 
 function MicroLearning() {
   const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const runWithLoader = useLoaderTask();
   
   // State for PDF upload and processing
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -18,22 +20,30 @@ function MicroLearning() {
   const [showAnswer, setShowAnswer] = useState(false);
   const [extractedText, setExtractedText] = useState('');
   
-  // Get API key from environment variables
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  // Get API key from environment variables (fallback to candidate keys if base key missing)
+  const apiKey = [
+    import.meta.env.VITE_GEMINI_API_KEY,
+    import.meta.env.VITE_GEMINI_API_KEY_1,
+    import.meta.env.VITE_GEMINI_API_KEY_2,
+    import.meta.env.VITE_GEMINI_API_KEY_3,
+    import.meta.env.VITE_GEMINI_API_KEY_4
+  ].find(Boolean);
 
   useEffect(() => {
     async function fetchUser() {
       try {
-        const user = await account.get();
-        setUserDetails(user);
-        setIsLoading(false);
+        await runWithLoader(async () => {
+          const user = await account.get();
+          setUserDetails(user);
+          setIsLoading(false);
+        });
       } catch (err) {
         console.error('User not logged in:', err);
         navigate('/login');
       }
     }
     fetchUser();
-  }, [navigate]);
+  }, [navigate, runWithLoader]);
 
   const handleLogout = async () => {
     try {
@@ -134,7 +144,7 @@ This content requires active engagement and regular review for optimal learning 
 
   const generateFlashcards = async () => {
     if (!apiKey) {
-      alert('Gemini API key not configured. Please check your environment variables.');
+      alert('Gemini API key not configured. Please set VITE_GEMINI_API_KEY or VITE_GEMINI_API_KEY_1-4 in your .env file.');
       return;
     }
 
@@ -175,7 +185,7 @@ This content requires active engagement and regular review for optimal learning 
         }
       });
       
-      const extractedTexts = await Promise.all(extractionPromises);
+  const extractedTexts = await runWithLoader(async () => Promise.all(extractionPromises));
       combinedText = extractedTexts.join('\n\n');
       
       console.log('Total extracted text length:', combinedText.length);
@@ -219,31 +229,33 @@ This content requires active engagement and regular review for optimal learning 
 
       // Call Gemini API to generate flashcards
       console.log('Calling Gemini API...');
-      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=' + apiKey, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `Create 10 study flashcards from this content. Return only a JSON array with objects containing "question" and "answer" fields. Focus on key concepts and important information:
+      const data = await runWithLoader(async () => {
+        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=' + apiKey, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: `Create 10 study flashcards from this content. Return only a JSON array with objects containing "question" and "answer" fields. Focus on key concepts and important information:
 
 ${combinedText.substring(0, 8000)}
 
 Return format: [{"question": "...", "answer": "..."}, ...]`
+              }]
             }]
-          }]
-        })
+          })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('API Error:', response.status, errorText);
+          throw new Error(`API request failed: ${response.status}`);
+        }
+
+        return response.json();
       });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error:', response.status, errorText);
-        throw new Error(`API request failed: ${response.status}`);
-      }
-
-      const data = await response.json();
       console.log('API Response:', data);
       
       if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
@@ -467,7 +479,7 @@ Return format: [{"question": "...", "answer": "..."}, ...]`
           
           {!apiKey && (
             <p className="text-center text-red-600 mt-2">
-              ⚠️ Gemini API key not configured. Please check your environment variables.
+              ⚠️ Gemini API key not configured. Please set VITE_GEMINI_API_KEY or VITE_GEMINI_API_KEY_1-4 in your .env file.
             </p>
           )}
         </div>
