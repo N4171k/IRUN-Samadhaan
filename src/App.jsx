@@ -26,6 +26,7 @@ import PI from './components/PI';
 import ConferenceTips from './components/ConferenceTips';
 import { APPWRITE_CONFIG_READY, APPWRITE_CONFIG_ERROR, APPWRITE_MISSING_KEYS } from './lib/appwrite';
 import { API_CONFIG_USING_FALLBACK, API_BASE_URL, API_CONFIG_FALLBACK_REASON, API_DEFAULT_BASE_URL } from './config/env';
+import { LoaderProvider } from './contexts/LoaderContext';
 
 
 
@@ -133,8 +134,9 @@ function App() {
   return (
     <NELEProvider>
       <BrowserRouter>
-        <NELEToast />
-        <Routes>
+        <LoaderProvider>
+          <NELEToast />
+          <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
@@ -158,7 +160,8 @@ function App() {
         <Route path="/gto" element={<GTO />} />
         <Route path="/pi" element={<PI />} />
         <Route path="/conference-tips" element={<ConferenceTips />} />
-      </Routes>
+          </Routes>
+        </LoaderProvider>
     </BrowserRouter>
     </NELEProvider>
   );

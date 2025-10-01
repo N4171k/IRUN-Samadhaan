@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { 
   CheckCircle, 
   XCircle, 
@@ -20,7 +20,6 @@ import {
 const DetailedOIRReport = ({ results, testData, userDetails, questions, answers, onRetakeTest, onBackToDrills }) => {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [pdfError, setPdfError] = useState(null);
-  const reportRef = useRef(null);
 
   // Safety checks for results
   if (!results) {

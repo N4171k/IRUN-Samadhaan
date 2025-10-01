@@ -10,6 +10,7 @@ import TestResults from './oir/TestResults';
 import DetailedOIRReport from './oir/DetailedOIRReport';
 import ErrorBoundary from './oir/ErrorBoundary';
 import OIRTestService from '../services/oirTestService';
+import { useLoaderTask } from '../contexts/LoaderContext';
 
 function OIR() {
   const navigate = useNavigate();
@@ -28,22 +29,25 @@ function OIR() {
   const [testData, setTestData] = useState(null);
   const [oirService] = useState(() => new OIRTestService());
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const runWithLoader = useLoaderTask();
 
 
 
   useEffect(() => {
     async function fetchUser() {
       try {
-        const user = await account.get();
-        setUserDetails(user);
-        setIsLoading(false);
+        await runWithLoader(async () => {
+          const user = await account.get();
+          setUserDetails(user);
+          setIsLoading(false);
+        });
       } catch (err) {
         console.error('User not logged in:', err);
         navigate('/login');
       }
     }
     fetchUser();
-  }, [navigate]);
+  }, [navigate, runWithLoader]);
 
   useEffect(() => {
     let intervalId;
@@ -73,25 +77,28 @@ function OIR() {
   }, [navigate]);
 
   const startTest = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const generatedTest = await oirService.generateTest();
-      setTestData(generatedTest);
-      setQuestions(generatedTest.questions);
-      setShowInstructions(false);
-      setIsTestActive(true);
-      setCurrentQuestionIndex(0);
-      setTimeRemaining(generatedTest.time_limit_minutes * 60);
-      setAnswers({});
-      setTestCompleted(false);
-      setTestResults(null);
-    } catch (error) {
-      console.error('Failed to generate test:', error);
-      alert(error?.message ? `Failed to generate test: ${error.message}` : 'Failed to generate test. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [oirService]);
+    await runWithLoader(async () => {
+      try {
+        setIsLoading(true);
+        const generatedTest = await oirService.generateTest();
+        setTestData(generatedTest);
+        setQuestions(generatedTest.questions);
+        setShowInstructions(false);
+        setIsTestActive(true);
+        setCurrentQuestionIndex(0);
+        setTimeRemaining(generatedTest.time_limit_minutes * 60);
+        setAnswers({});
+        setTestCompleted(false);
+        setTestResults(null);
+      } catch (error) {
+        console.error('Failed to generate test:', error);
+        alert(error?.message ? `Failed to generate test: ${error.message}` : 'Failed to generate test. Please try again.');
+        throw error;
+      } finally {
+        setIsLoading(false);
+      }
+    });
+  }, [oirService, runWithLoader]);
 
   const handleAnswerSelect = useCallback((questionId, answer) => {
     setAnswers(prev => ({
@@ -117,28 +124,31 @@ function OIR() {
   const handleTestComplete = async () => {
     setIsTestActive(false);
     setIsSubmitting(true);
-    
-    try {
-      const submission = {
-        test_id: testData.test_id,
-        answers: answers,
-        time_taken: (testData.time_limit_minutes * 60) - timeRemaining,
-        completed_at: new Date().toISOString()
-      };
-      
-      const results = await oirService.submitTest(
-        testData.test_id, 
-        answers, 
-        (testData.time_limit_minutes * 60) - timeRemaining
-      );
-      setTestResults(results);
-      setTestCompleted(true);
-    } catch (error) {
-      console.error('Failed to submit test:', error);
-      alert('Failed to submit test. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+
+    await runWithLoader(async () => {
+      try {
+        const submission = {
+          test_id: testData.test_id,
+          answers: answers,
+          time_taken: (testData.time_limit_minutes * 60) - timeRemaining,
+          completed_at: new Date().toISOString()
+        };
+
+        const results = await oirService.submitTest(
+          testData.test_id,
+          answers,
+          (testData.time_limit_minutes * 60) - timeRemaining
+        );
+        setTestResults(results);
+        setTestCompleted(true);
+      } catch (error) {
+        console.error('Failed to submit test:', error);
+        alert('Failed to submit test. Please try again.');
+        throw error;
+      } finally {
+        setIsSubmitting(false);
+      }
+    });
   };
 
   const resetTest = () => {

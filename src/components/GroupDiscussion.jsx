@@ -5,11 +5,13 @@ import Navbar from './Navbar';
 import AIGDSimulator from './AIGDSimulator';
 import ErrorBoundary from './ErrorBoundary';
 import { ArrowLeft, Users, Timer, Bot, Megaphone } from 'lucide-react';
+import { useLoaderTask } from '../contexts/LoaderContext';
 
 function GroupDiscussion() {
   const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const runWithLoader = useLoaderTask();
   
   // GD State
   const [mode, setMode] = useState('real');
@@ -59,16 +61,18 @@ function GroupDiscussion() {
   useEffect(() => {
     async function fetchUser() {
       try {
-        const user = await account.get();
-        setUserDetails(user);
-        setIsLoading(false);
+        await runWithLoader(async () => {
+          const user = await account.get();
+          setUserDetails(user);
+          setIsLoading(false);
+        });
       } catch (err) {
         console.error('User not logged in:', err);
         navigate('/login');
       }
     }
     fetchUser();
-  }, [navigate]);
+  }, [navigate, runWithLoader]);
 
   useEffect(() => {
     // Get user's PPDT story from localStorage or previous test
