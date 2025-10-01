@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import Navbar from '../../components/Navbar';
 import { useNavigate } from 'react-router-dom';
 import { useLoaderTask } from '../../contexts/LoaderContext';
@@ -6,14 +6,27 @@ import * as pdfjsLib from 'pdfjs-dist/webpack';
 
 function NoteSynthesizer() {
   const navigate = useNavigate();
-  const [notes, setNotes] = useState('');
-  const [synthesizedNotes, setSynthesizedNotes] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [summary, setSummary] = useState('');
+  const [isSummarizing, setIsSummarizing] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
   const [pdfError, setPdfError] = useState('');
   const [uploadedFileName, setUploadedFileName] = useState('');
+  const [extractedText, setExtractedText] = useState('');
+  const [extractedPreview, setExtractedPreview] = useState('');
+  const [extractedLength, setExtractedLength] = useState(0);
   const runWithLoader = useLoaderTask();
   const fileInputRef = useRef(null);
+
+  const apiKey = useMemo(
+    () => [
+      import.meta.env.VITE_GEMINI_API_KEY,
+      import.meta.env.VITE_GEMINI_API_KEY_1,
+      import.meta.env.VITE_GEMINI_API_KEY_2,
+      import.meta.env.VITE_GEMINI_API_KEY_3,
+      import.meta.env.VITE_GEMINI_API_KEY_4
+    ].find(Boolean),
+    []
+  );
 
   const extractTextFromPDF = async (file) => {
     const arrayBuffer = await file.arrayBuffer();
@@ -47,61 +60,107 @@ function NoteSynthesizer() {
     setUploadedFileName(file.name);
 
     try {
-      const extracted = await runWithLoader(async () => extractTextFromPDF(file));
+      const extracted = await runWithLoader(() => extractTextFromPDF(file));
       if (!extracted) {
         throw new Error('No readable text found in the PDF.');
       }
 
-      setNotes(prev => {
-        const prefix = prev.trim() ? `${prev.trim()}\n\n` : '';
-        return `${prefix}${extracted}`;
-      });
-
-      setSynthesizedNotes('');
+      setExtractedText(extracted);
+      setExtractedPreview(extracted.slice(0, 600) + (extracted.length > 600 ? '...' : ''));
+      setExtractedLength(extracted.length);
+      setSummary('');
+      setIsExtracting(false);
+      await handleSummarise(extracted);
     } catch (error) {
       console.error('PDF extraction failed:', error);
       setPdfError(error.message || 'Failed to extract text from the PDF. Please try another file.');
       setUploadedFileName('');
+      setExtractedText('');
+      setExtractedPreview('');
+      setExtractedLength(0);
     } finally {
-      setIsExtracting(false);
+  setIsExtracting(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     }
   };
 
-  const handleSynthesize = async () => {
-    if (!notes.trim()) return;
-    
-    setIsLoading(true);
-    try {
-      await runWithLoader(async () => new Promise((resolve) => {
-        setTimeout(() => {
-          setSynthesizedNotes(
-            'Synthesized Notes Summary\n\n' +
-            'Key Points:\n' +
-            '• Main concepts extracted from your notes\n' +
-            '• Important details highlighted\n' +
-            '• Structured format for better understanding\n\n' +
-            'Quick Review:\n' +
-            '• Bullet points for easy scanning\n' +
-            '• Connections between topics identified\n' +
-            '• Action items highlighted\n\n' +
-            'Study Tips:\n' +
-            '• Focus areas identified\n' +
-            '• Memory techniques suggested\n' +
-            '• Review schedule recommended'
-          );
-          resolve();
-        }, 2000);
-      }));
-    } finally {
-      setIsLoading(false);
+  const summariseText = async (text) => {
+    if (!text.trim()) {
+      throw new Error('Nothing to summarise. The PDF appears to be empty.');
     }
+
+    if (!apiKey) {
+      // Fallback summary when API is unavailable
+      const excerpt = text.slice(0, 1200).split('\n').filter(Boolean).slice(0, 4).join('\n');
+      return [
+        '⚠️ Gemini API key not configured. Showing a quick manual summary instead:',
+        '',
+        excerpt.length ? excerpt : 'No readable text could be extracted from the PDF.'
+      ].join('\n');
+    }
+
+    const trimmedContent = text.length > 12000 ? `${text.slice(0, 12000)}...` : text;
+    const prompt = `You are a professional study assistant. Carefully read the following document and produce a concise yet comprehensive summary.
+
+Requirements:
+1. Start with a two-sentence executive overview.
+2. Provide 4-6 key takeaways as bullet points.
+3. Highlight action items or recommendations, if any.
+4. List unfamiliar terms with one-line explanations when relevant.
+5. Keep the entire response under 400 words.
+
+Document content:
+"""
+${trimmedContent}
+"""`;
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }]
+        })
+      }
+    );
+
+    const data = await response.json();
+    const generatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!generatedText) {
+      throw new Error('Received an empty response from Gemini.');
+    }
+
+    return generatedText.trim();
   };
 
   const handleLogout = () => {
     navigate('/login');
+  };
+
+  const handleSummarise = async (text = extractedText) => {
+    if (!text?.trim()) {
+      setPdfError('Upload a PDF before requesting a summary.');
+      return;
+    }
+
+    setIsSummarizing(true);
+    setSummary('');
+    setPdfError('');
+    try {
+      const generatedSummary = await runWithLoader(() => summariseText(text));
+      setSummary(generatedSummary);
+    } catch (error) {
+      console.error(error);
+      setPdfError(error.message || 'Unable to summarise the document.');
+    } finally {
+      setIsSummarizing(false);
+    }
   };
 
   return (
@@ -116,23 +175,23 @@ function NoteSynthesizer() {
           <button className="back-btn" onClick={() => navigate('/ai-run')}>
             ← Back to AI-Run
           </button>
-          <h1 className="feature-title">Note Synthesizer</h1>
+          <h1 className="feature-title">PDF Summarizer</h1>
           <p className="feature-description">
-            Transform your scattered notes into organized, structured summaries using AI
+            Upload a PDF and let AI deliver an actionable study summary in seconds.
           </p>
         </div>
 
         <div className="synthesizer-workspace">
           <div className="input-section">
-            <h3>Your Notes</h3>
+            <h3>Upload Document</h3>
             <label className="pdf-upload">
-              <span className="pdf-upload__label">Upload a PDF to auto-fill notes</span>
+              <span className="pdf-upload__label">Choose a PDF to summarise</span>
               <input
                 type="file"
                 accept="application/pdf"
                 onChange={handlePdfUpload}
                 ref={fileInputRef}
-                disabled={isExtracting || isLoading}
+                disabled={isExtracting || isSummarizing}
               />
             </label>
             {uploadedFileName && !pdfError && (
@@ -141,45 +200,54 @@ function NoteSynthesizer() {
             {pdfError && (
               <p className="pdf-upload__error">{pdfError}</p>
             )}
-            <textarea
-              className="notes-input"
-              placeholder="Paste your notes here... The AI will help organize and synthesize them into a structured format."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={12}
-            />
-            <button 
-              className={`synthesize-btn ${!notes.trim() ? 'disabled' : ''}`}
-              onClick={handleSynthesize}
-              disabled={!notes.trim() || isLoading || isExtracting}
-            >
-              {isLoading ? 'Synthesizing...' : 'Synthesize Notes'}
-            </button>
+            {extractedPreview && (
+              <div className="extracted-preview">
+                <div className="extracted-preview__header">
+                  <h4>Extracted preview</h4>
+                  <span>{extractedLength.toLocaleString()} characters</span>
+                </div>
+                <p>{extractedPreview}</p>
+              </div>
+            )}
             {isExtracting && (
               <div className="pdf-upload__progress">
                 <div className="loading-spinner"></div>
                 <span>Extracting text from PDF...</span>
               </div>
             )}
+            {!apiKey && (
+              <p className="api-warning">
+                ⚠️ No Gemini API key detected. Add VITE_GEMINI_API_KEY (or VITE_GEMINI_API_KEY_1-4) to enable AI-powered summaries.
+              </p>
+            )}
           </div>
 
           <div className="output-section">
-            <h3>Synthesized Output</h3>
+            <h3>Summary</h3>
             <div className="notes-output">
-              {isLoading ? (
+              {isSummarizing ? (
                 <div className="loading-state">
                   <div className="loading-spinner"></div>
-                  <p>AI is analyzing and organizing your notes...</p>
+                  <p>AI is digesting the document...</p>
                 </div>
-              ) : synthesizedNotes ? (
-                <pre className="synthesized-content">{synthesizedNotes}</pre>
+              ) : summary ? (
+                <pre className="synthesized-content">{summary}</pre>
               ) : (
                 <div className="empty-state">
-                  <p>Your synthesized notes will appear here</p>
-                  <p>Add some notes and click "Synthesize Notes" to get started!</p>
+                  <p>Your summary will appear here.</p>
+                  <p>Upload a PDF to get started.</p>
                 </div>
               )}
             </div>
+            {summary && (
+              <button
+                className="synthesize-btn"
+                onClick={() => handleSummarise()}
+                disabled={isSummarizing || !extractedText}
+              >
+                {isSummarizing ? 'Summarising...' : 'Refresh Summary'}
+              </button>
+            )}
           </div>
         </div>
       </div>
