@@ -1,5 +1,4 @@
 import React, { useState, useRef } from 'react';
-import './pdfExportCompat.css';
 import { 
   CheckCircle, 
   XCircle, 
@@ -139,61 +138,148 @@ const DetailedOIRReport = ({ results, testData, userDetails, questions, answers,
 
   const generatePDF = async () => {
     if (isGeneratingPDF) return;
-    if (!reportRef.current) {
-      setPdfError('Report contents are not ready yet.');
-      return;
-    }
 
     setPdfError(null);
     setIsGeneratingPDF(true);
 
     try {
-      const [{ jsPDF }, html2CanvasModule] = await Promise.all([
-        import('jspdf'),
-        import('html2canvas')
-      ]);
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-      const html2canvas = html2CanvasModule.default ?? html2CanvasModule;
-      const reportElement = reportRef.current;
+      const marginX = 16;
+      const maxWidth = 180;
+      const lineHeight = 6;
+      let cursorY = 22;
 
-      reportElement.classList.add('pdf-export-compat');
+      const ensureSpace = (lines = 1) => {
+        if (cursorY + lines * lineHeight > 280) {
+          doc.addPage();
+          cursorY = 22;
+        }
+      };
 
-      try {
-        // Wait a tick to ensure fonts/images are settled and fallback styles apply
-        await new Promise((resolve) => setTimeout(resolve, 50));
+      const addHeading = (text, size = 16) => {
+        ensureSpace(2);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(size);
+        doc.text(text, marginX, cursorY);
+        cursorY += size / 2 + 4;
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+      };
 
-        const canvas = await html2canvas(reportElement, {
-          scale: window.devicePixelRatio > 1 ? 2 : 1.5,
-          useCORS: true,
-          allowTaint: false,
-          scrollX: 0,
-          scrollY: 0,
-          backgroundColor: '#ffffff'
+      const addParagraph = (text, options = {}) => {
+        const { bold = false } = options;
+        const lines = doc.splitTextToSize(text, maxWidth);
+        ensureSpace(lines.length);
+        doc.setFont('helvetica', bold ? 'bold' : 'normal');
+        doc.text(lines, marginX, cursorY);
+        cursorY += lines.length * lineHeight;
+        doc.setFont('helvetica', 'normal');
+      };
+
+      const addKeyValueRows = (rows) => {
+        rows.forEach(([label, value]) => {
+          ensureSpace(1);
+          doc.setFont('helvetica', 'bold');
+          doc.text(`${label}:`, marginX, cursorY);
+          doc.setFont('helvetica', 'normal');
+          doc.text(String(value), marginX + 48, cursorY);
+          cursorY += lineHeight;
         });
+      };
 
-        const imgData = canvas.toDataURL('image/png', 1.0);
-        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-        const pageWidth = pdf.internal.pageSize.getWidth() - 20; // subtract horizontal margin
-        const pageHeight = pdf.internal.pageSize.getHeight() - 20; // subtract vertical margin
-        const imgHeight = (canvas.height * pageWidth) / canvas.width;
-        const totalPages = Math.max(1, Math.ceil(imgHeight / pageHeight));
-
-        for (let pageIndex = 0; pageIndex < totalPages; pageIndex += 1) {
-          if (pageIndex > 0) {
-            pdf.addPage();
-          }
-
-          const offsetY = -pageHeight * pageIndex;
-          pdf.addImage(imgData, 'PNG', 10, 10 + offsetY, pageWidth, imgHeight);
+      const addBulletList = (items, emptyFallback) => {
+        if (!items || items.length === 0) {
+          addParagraph(emptyFallback || '—');
+          return;
         }
 
-        const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-');
-        const filename = `OIR_Test_Report_${userDetails?.name || 'Candidate'}_${timestamp}.pdf`;
-        pdf.save(filename);
-      } finally {
-        reportElement.classList.remove('pdf-export-compat');
+        items.forEach((item) => {
+          const lines = doc.splitTextToSize(item, maxWidth - 8);
+          ensureSpace(lines.length);
+          doc.text('•', marginX, cursorY);
+          doc.text(lines, marginX + 6, cursorY);
+          cursorY += lines.length * lineHeight;
+        });
+      };
+
+      addHeading('Officer Intelligence Rating (OIR)');
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      ensureSpace(1);
+      doc.text('Detailed Performance Report', marginX, cursorY);
+      cursorY += lineHeight + 2;
+
+      addHeading('Candidate Information', 13);
+      addKeyValueRows([
+        ['Candidate', userDetails?.name || 'Test Candidate'],
+        ['Date', new Date().toLocaleDateString()],
+        ['Test ID', testData?.test_id || 'N/A']
+      ]);
+      cursorY += 2;
+
+      addHeading('Overall Performance', 13);
+      addParagraph(`Overall Score: ${safeResults.score}% (${safeResults.performance_level})`, { bold: true });
+      addKeyValueRows([
+        ['Correct Answers', `${safeResults.correct_answers}/${safeResults.total_questions}`],
+        ['Percentile Rank', `${safeResults.percentile}th`],
+        ['Time Taken', formatTime(safeResults.time_taken)],
+        ['Accuracy', `${analytics.accuracy.toFixed(1)}%`],
+        ['Attempt Rate', `${analytics.attempt_rate.toFixed(1)}%`],
+        ['Average Time/Question', `${Math.round(analytics.average_time_per_question)}s`]
+      ]);
+      cursorY += 2;
+
+      addHeading('Verbal vs Non-Verbal', 13);
+      addKeyValueRows([
+        ['Verbal Reasoning Score', `${safeResults.verbal_score}%`],
+        ['Non-Verbal Reasoning Score', `${safeResults.non_verbal_score}%`]
+      ]);
+      cursorY += 2;
+
+      addHeading('Strengths', 13);
+      addBulletList(analytics.strengths, 'No specific strengths identified.');
+      cursorY += 2;
+
+      addHeading('Areas for Improvement', 13);
+      addBulletList(analytics.areas_for_improvement, 'No critical weaknesses detected.');
+      cursorY += 2;
+
+      addHeading('Recommendations', 13);
+      addBulletList(analytics.recommendations, 'No recommendations at this time.');
+      cursorY += 2;
+
+      if (safeResults.results?.length) {
+        addHeading('Question Summary', 13);
+        const statuses = safeResults.results.map((result) => {
+          const status = result.is_correct ? 'Correct' : (result.user_answer !== null ? 'Incorrect' : 'Not Attempted');
+          return `Q${result.question_id}: ${status}`;
+        });
+
+        const columns = 3;
+        const columnWidth = 60;
+        const rowsPerColumn = Math.ceil(statuses.length / columns);
+
+        for (let row = 0; row < rowsPerColumn; row += 1) {
+          ensureSpace(1);
+          for (let col = 0; col < columns; col += 1) {
+            const index = row + col * rowsPerColumn;
+            if (index >= statuses.length) continue;
+            doc.text(statuses[index], marginX + col * columnWidth, cursorY);
+          }
+          cursorY += lineHeight;
+        }
       }
+
+      ensureSpace(2);
+      cursorY += lineHeight;
+      doc.setFont('helvetica', 'italic');
+      doc.text(`Report generated on ${new Date().toLocaleString()}`, marginX, cursorY);
+
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-');
+      const filename = `OIR_Test_Report_${userDetails?.name || 'Candidate'}_${timestamp}.pdf`;
+      doc.save(filename);
     } catch (error) {
       console.error('Error generating PDF:', error);
       setPdfError('Failed to generate PDF. Please try again after reloading the page.');
