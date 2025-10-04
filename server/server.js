@@ -252,7 +252,8 @@ interviewWss.on('connection', (socket) => {
       const stream = streamInterviewResponse({
         sessionId: payload.sessionId,
         history: payload.history || [],
-        input: candidateText
+        input: candidateText,
+        profile: payload.profile || {}
       });
 
       for await (const event of stream) {

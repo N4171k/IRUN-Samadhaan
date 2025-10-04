@@ -12,7 +12,7 @@ import AIRun from './pages/AIRun';
 import NoteSynthesizer from './pages/ai-features/NoteSynthesizer';
 import MicroLearning from './pages/ai-features/MicroLearning';
 import StudyPlanGenerator from './pages/ai-features/StudyPlanGenerator';
-import MockInterview from './pages/ai-features/MockInterview';
+import AIChatBotInterview from './pages/ai-features/AIChatBotInterview';
 import EmotionAnalysis from './pages/EmotionAnalysis';
 import ThematicApperceptionTest from './components/ThematicApperceptionTest';
 import WordAssociationTest from './components/WordAssociationTest';
@@ -146,10 +146,10 @@ function App() {
         <Route path="/ssb-drills" element={<SSBDrills />} />
         <Route path="/test-prep" element={<TestPrep />} />
         <Route path="/ai-run" element={<AIRun />} />
-        <Route path="/ai-run/note-synthesizer" element={<NoteSynthesizer />} />
+  <Route path="/ai-run/ai-chat-bot-interview" element={<AIChatBotInterview />} />
+  <Route path="/ai-run/note-synthesizer" element={<NoteSynthesizer />} />
         <Route path="/ai-run/micro-learning" element={<MicroLearning />} />
         <Route path="/ai-run/study-plan" element={<StudyPlanGenerator />} />
-  <Route path="/ai-run/ai-mock-interview" element={<MockInterview />} />
         <Route path="/emotion-analysis" element={<EmotionAnalysis />} />
 
         <Route path="/tat" element={<ThematicApperceptionTest />} />

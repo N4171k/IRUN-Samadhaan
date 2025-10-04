@@ -5,12 +5,15 @@ const router = express.Router();
 
 router.post('/chat', async (req, res) => {
   try {
-    const { sessionId, history = [], prompt } = req.body || {};
+    const { sessionId, history = [], prompt, profile = {} } = req.body || {};
     if (!prompt) {
       return res.status(400).json({ error: 'Prompt is required' });
     }
 
-    const result = await runInterviewTurn({ sessionId, history, input: prompt });
+    const safeHistory = Array.isArray(history) ? history : [];
+    const safeProfile = profile && typeof profile === 'object' ? profile : {};
+
+    const result = await runInterviewTurn({ sessionId, history: safeHistory, input: prompt, profile: safeProfile });
     res.json(result);
   } catch (error) {
     console.error('[JeetuInterview] /api/interview/chat failed', error);
